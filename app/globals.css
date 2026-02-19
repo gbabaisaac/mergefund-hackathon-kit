@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ============================================
+ * MERGEFUND HACKATHON - DESIGN SYSTEM
+ * ============================================
+ *
+ * Feel free to modify these variables!
+ * The goal is to create a beautiful, modern landing page.
+ *
+ * Primary Color: MergeFund Purple (262, 83%, 58%)
+ * You can experiment with different shades and accents.
+ */
+
+@layer base {
+  :root {
+    /* Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --border: 0 0% 90%;
+    --ring: 262 83% 58%;
+  }
+
+  .dark {
+    /* Dark Mode */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 64%;
+    --border: 0 0% 100% / 0.08;
+    --ring: 262 83% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer components {
+  /*
+   * HACKATHON TIP: These are example utility classes.
+   * Feel free to create your own or modify these!
+   */
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-primary text-primary-foreground font-medium;
+    @apply px-6 py-3 rounded-full;
+    @apply transition-all duration-200;
+    @apply hover:opacity-90 hover:scale-[1.02];
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-muted text-foreground font-medium;
+    @apply px-6 py-3 rounded-full;
+    @apply border border-border;
+    @apply transition-all duration-200;
+    @apply hover:bg-muted/80;
+  }
+
+  .card {
+    @apply bg-card text-card-foreground;
+    @apply rounded-xl border border-border;
+    @apply p-6;
+  }
+
+  .section {
+    @apply py-20 md:py-32;
+  }
+
+  .container-custom {
+    @apply max-w-6xl mx-auto px-4 sm:px-6;
+  }
+
+  /* Gradient text effect - optional */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-purple-400;
+  }
+
+  /* Dot grid background pattern */
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      hsl(var(--foreground) / 0.06) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
