@@ -4,7 +4,7 @@ export const mockBounties = [
     title: "Fix mobile overflow on stats cards",
     reward: 120,
     tags: ["frontend", "ux", "bugfix"],
-    difficulty: "Easy",
+    difficulty: "Easy" as const,
     progress: 60,
   },
   {
@@ -12,7 +12,7 @@ export const mockBounties = [
     title: "Add CSV export to leaderboard",
     reward: 250,
     tags: ["data", "dashboard"],
-    difficulty: "Medium",
+    difficulty: "Medium" as const,
     progress: 35,
   },
   {
@@ -20,7 +20,9 @@ export const mockBounties = [
     title: "Improve bounty discovery ranking",
     reward: 400,
     tags: ["algorithm", "ranking"],
-    difficulty: "Hard",
+    difficulty: "Hard" as const,
     progress: 10,
   },
-];
+] as const;
+
+export type Bounty = (typeof mockBounties)[number];
