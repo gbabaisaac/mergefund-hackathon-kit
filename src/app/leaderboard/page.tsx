@@ -1,7 +1,10 @@
 import { mockLeaderboard } from "@/data/mock-leaderboard";
 
 export default function LeaderboardPage() {
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    return b.reputation - a.reputation;
+  });
 
   return (
     <div className="space-y-6">
