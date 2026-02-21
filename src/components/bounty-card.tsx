@@ -13,6 +13,8 @@ const difficultyStyles = {
 };
 
 export function BountyCard({ title, reward, tags, difficulty, progress }: BountyCardProps) {
+  const clampedProgress = Math.max(0, Math.min(100, progress));
+
   return (
     <div className="card p-5 hover:shadow-md transition">
       <div className="flex items-start justify-between gap-4">
@@ -37,12 +39,12 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
       <div className="mt-4">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>Progress</span>
-          <span>{progress}%</span>
+          <span>{clampedProgress}%</span>
         </div>
         <div className="mt-2 h-2 w-full rounded-full bg-slate-100">
           <div
             className="h-2 rounded-full bg-brand-600"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${clampedProgress}%` }}
           />
         </div>
       </div>
