@@ -1,7 +1,7 @@
 type BountyCardProps = {
   title: string;
   reward: number;
-  tags: string[];
+  tags: readonly string[];
   difficulty: "Easy" | "Medium" | "Hard";
   progress: number;
 };
