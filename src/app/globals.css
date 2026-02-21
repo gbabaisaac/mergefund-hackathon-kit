@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-slate-900;
+}
+
+.card {
+  @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+}
+
+.pill {
+  @apply inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700;
+}
+
+.btn-outline {
+  @apply inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50;
+}
