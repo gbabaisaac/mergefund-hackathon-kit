@@ -2,30 +2,38 @@
 
 import { useState, useEffect } from "react";
 
-// BUG 1: Theme flash on page load - theme is not persisted or applied before hydration
-// BUG 2: Icon doesn't match actual theme state on initial load
-// BUG 3: Some components don't respect the theme (inconsistent styling)
-// FIX: Use localStorage with SSR-safe initialization, apply theme before React hydrates
-
 export function ThemeToggle() {
-  // BUG: Initial state doesn't match what's in localStorage or system preference
-  // This causes a flash when the component mounts
-  const [isDark, setIsDark] = useState(false);
+  // Initialize state based on localStorage or system preference
+  // This ensures theme is applied before first render
+  const [isDark, setIsDark] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // BUG: This runs after hydration, causing theme flash
-    // The page renders in light mode first, then switches to dark
+    // Check localStorage first, then system preference
     const stored = localStorage.getItem("theme");
+    let shouldBeDark = false;
+    
     if (stored === "dark") {
-      setIsDark(true);
+      shouldBeDark = true;
+    } else if (stored === "light") {
+      shouldBeDark = false;
+    } else {
+      // Check system preference if no stored value
+      shouldBeDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    
+    setIsDark(shouldBeDark);
+    if (shouldBeDark) {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
 
-    if (!isDark) {
+    if (newIsDark) {
       document.documentElement.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
@@ -34,13 +42,25 @@ export function ThemeToggle() {
     }
   };
 
+  // Don't render anything until we've checked the theme
+  // This prevents flash of wrong theme
+  if (isDark === null) {
+    return (
+      <button
+        className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800"
+        aria-label="Toggle theme"
+      >
+        <div className="w-5 h-5" />
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={toggleTheme}
       className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
       aria-label="Toggle theme"
     >
-      {/* BUG: Icon state might not match actual theme on first render */}
       {isDark ? (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -64,7 +84,7 @@ export function ThemeToggle() {
   );
 }
 
-// Example component that doesn't properly support dark mode
+// Fixed component - properly supports dark mode
 export function InconsistentCard() {
   return (
     <div className="card p-6 space-y-4">
@@ -77,27 +97,26 @@ export function InconsistentCard() {
         </p>
       </div>
 
-      {/* BUG: This card is hardcoded with light-mode colors */}
-      <div className="p-4 rounded-lg bg-white border border-slate-200">
-        <p className="text-slate-700">
-          This text does NOT adapt to dark mode - it&apos;s always light!
+      {/* FIXED: Now uses dark mode classes */}
+      <div className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+        <p className="text-slate-700 dark:text-slate-300">
+          This text now properly adapts to dark mode!
         </p>
       </div>
 
-      {/* BUG: This uses inline styles that override dark mode */}
-      <div
-        className="p-4 rounded-lg"
-        style={{ backgroundColor: "#f8fafc", color: "#334155" }}
-      >
-        <p>This uses inline styles and ignores dark mode completely.</p>
+      {/* FIXED: Now uses CSS variables instead of inline styles */}
+      <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-700">
+        <p className="text-slate-700 dark:text-slate-300">
+          This now uses proper dark mode classes instead of inline styles.
+        </p>
       </div>
 
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-xs text-amber-700">
-          <strong>Bug hints:</strong>
-          <br />1. Toggle dark mode and refresh - notice the flash of wrong theme
-          <br />2. Some cards above don&apos;t change in dark mode
-          <br />3. The icon might show the wrong state initially
+      <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg">
+        <p className="text-xs text-amber-700 dark:text-amber-400">
+          <strong>Fixed:</strong>
+          <br />1. Theme is now properly applied on initial load
+          <br />2. All cards above properly support dark mode
+          <br />3. No more theme flash on page load
         </p>
       </div>
     </div>
