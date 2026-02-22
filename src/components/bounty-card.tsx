@@ -2,7 +2,7 @@ type BountyCardProps = {
   title: string;
   reward: number;
   tags: string[];
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: string;
   progress: number;
 };
 
@@ -29,7 +29,7 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
         <div className="text-right">
           <div className="text-sm text-slate-500">Reward</div>
           <div className="text-xl font-bold">${reward}</div>
-          <span className={`mt-2 inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${difficultyStyles[difficulty]}`}>
+          <span className={`mt-2 inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${difficultyStyles[difficulty as keyof typeof difficultyStyles]}`}>
             {difficulty}
           </span>
         </div>
