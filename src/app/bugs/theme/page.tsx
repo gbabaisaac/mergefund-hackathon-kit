@@ -9,7 +9,7 @@ export default function ThemeBugPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Bug: Dark Mode Inconsistencies</h1>
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
               Toggle dark mode and notice the issues: flash on page load,
               icon mismatch, and inconsistent styling.
             </p>
