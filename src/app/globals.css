@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --brand-50: 240 100% 98%;
+    --brand-100: 240 100% 95%;
+    --brand-200: 240 100% 90%;
+    --brand-300: 240 100% 80%;
+    --brand-400: 240 100% 70%;
+    --brand-500: 240 90% 60%;
+    --brand-600: 240 80% 50%;
+    --brand-700: 240 80% 40%;
+    --brand-800: 240 80% 30%;
+    --brand-900: 240 80% 20%;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 html,
 body {
   height: 100%;

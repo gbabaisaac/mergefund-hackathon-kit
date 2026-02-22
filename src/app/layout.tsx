@@ -18,6 +18,7 @@ export default function RootLayout({
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
               <div className="text-lg font-semibold">MergeFund Hackathon Kit</div>
               <nav className="flex items-center gap-3 text-sm text-slate-600">
+                <a className="hover:text-slate-900" href="/showcase">Showcase</a>
                 <a className="hover:text-slate-900" href="/bounty-card">Bounty Card</a>
                 <a className="hover:text-slate-900" href="/leaderboard">Leaderboard</a>
                 <a className="hover:text-slate-900" href="/discovery">Discovery</a>

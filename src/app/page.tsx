@@ -9,7 +9,15 @@ export default function HomePage() {
         </p>
       </div>
       <h2 className="text-xl font-semibold mt-6">Feature Tasks</h2>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="card p-5 border-brand-200 bg-brand-50/20">
+          <span className="text-xs font-semibold text-brand-600 uppercase">New</span>
+          <h2 className="text-lg font-semibold mt-1">Project Showcase</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            A premium gallery for hackathon projects with voting and search.
+          </p>
+          <a className="btn mt-4" href="/showcase">Open</a>
+        </div>
         <div className="card p-5">
           <h2 className="text-lg font-semibold">Bounty Card</h2>
           <p className="mt-2 text-sm text-slate-600">
