@@ -1,27 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useCallback } from "react";
 
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+// FIX: Persist filter state to URL query params so it survives page refresh
+// and is shareable via URL.
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Read initial state from URL query params, fallback to defaults
+  const difficulty = searchParams.get("difficulty") ?? "all";
+  const minReward = Number(searchParams.get("minReward") ?? "0");
+
+  const updateParams = useCallback(
+    (newDifficulty: string, newMinReward: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (newDifficulty === "all") {
+        params.delete("difficulty");
+      } else {
+        params.set("difficulty", newDifficulty);
+      }
+
+      if (newMinReward <= 0) {
+        params.delete("minReward");
+      } else {
+        params.set("minReward", String(newMinReward));
+      }
+
+      const qs = params.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+      onFilterChange({ difficulty: newDifficulty, minReward: newMinReward });
+    },
+    [searchParams, router, pathname, onFilterChange]
+  );
 
   const handleDifficultyChange = (value: string) => {
-    setDifficulty(value);
-    onFilterChange({ difficulty: value, minReward });
+    updateParams(value, minReward);
   };
 
   const handleMinRewardChange = (value: number) => {
-    setMinReward(value);
-    onFilterChange({ difficulty, minReward: value });
+    updateParams(difficulty, value);
   };
 
   return (
@@ -49,10 +75,6 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
           className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           placeholder="0"
         />
-      </div>
-
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
       </div>
     </div>
   );

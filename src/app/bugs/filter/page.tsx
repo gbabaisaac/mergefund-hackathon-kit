@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import { BountyFilter } from "@/components/bounty-filter";
 
 const mockBounties = [
@@ -11,8 +12,22 @@ const mockBounties = [
   { id: "5", title: "Update documentation", difficulty: "Easy", reward: 50 },
 ];
 
-export default function FilterBugPage() {
-  const [filters, setFilters] = useState({ difficulty: "all", minReward: 0 });
+function FilterContent() {
+  const searchParams = useSearchParams();
+
+  // Initialize filters from URL params so state survives refresh
+  const [filters, setFilters] = useState(() => ({
+    difficulty: searchParams.get("difficulty") ?? "all",
+    minReward: Number(searchParams.get("minReward") ?? "0"),
+  }));
+
+  // Sync filters when URL params change (e.g. browser back/forward)
+  useEffect(() => {
+    setFilters({
+      difficulty: searchParams.get("difficulty") ?? "all",
+      minReward: Number(searchParams.get("minReward") ?? "0"),
+    });
+  }, [searchParams]);
 
   const filteredBounties = mockBounties.filter((bounty) => {
     if (filters.difficulty !== "all" && bounty.difficulty !== filters.difficulty) {
@@ -27,9 +42,10 @@ export default function FilterBugPage() {
   return (
     <div className="space-y-6">
       <div className="card p-6">
-        <h1 className="text-2xl font-bold">Bug: Filter State Not Persisted</h1>
+        <h1 className="text-2xl font-bold">Filter State Persisted via URL</h1>
         <p className="mt-2 text-slate-600">
-          Set some filters below, then refresh the page. Notice how the filters reset!
+          Set some filters below, then refresh the page. The filters are now
+          persisted in the URL query parameters!
         </p>
       </div>
 
@@ -54,15 +70,14 @@ export default function FilterBugPage() {
           ))}
         </div>
       </div>
-
-      <div className="card p-6 bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-800">Your Task</h3>
-        <p className="mt-2 text-sm text-blue-700">
-          Fix the <code className="bg-blue-100 px-1 rounded">BountyFilter</code> component
-          in <code className="bg-blue-100 px-1 rounded">src/components/bounty-filter.tsx</code>
-          to persist filter state across page refreshes using URL query parameters or localStorage.
-        </p>
-      </div>
     </div>
+  );
+}
+
+export default function FilterBugPage() {
+  return (
+    <Suspense fallback={<div>Loading filters...</div>}>
+      <FilterContent />
+    </Suspense>
   );
 }
