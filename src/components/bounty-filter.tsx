@@ -1,18 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+// FIX: Persist to localStorage for consistent state across refreshes
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
+  // Initialize from localStorage if available, otherwise use defaults
   const [difficulty, setDifficulty] = useState("all");
   const [minReward, setMinReward] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedDifficulty = localStorage.getItem("bounty_filter_difficulty");
+    const savedMinReward = localStorage.getItem("bounty_filter_minReward");
+
+    if (savedDifficulty) setDifficulty(savedDifficulty);
+    if (savedMinReward) setMinReward(Number(savedMinReward));
+    
+    // Notify parent of initial state
+    onFilterChange({ 
+      difficulty: savedDifficulty || "all", 
+      minReward: Number(savedMinReward) || 0 
+    });
+    
+    setIsInitialized(true);
+  }, []);
+
+  // Save to localStorage when state changes
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    localStorage.setItem("bounty_filter_difficulty", difficulty);
+    localStorage.setItem("bounty_filter_minReward", minReward.toString());
+  }, [difficulty, minReward, isInitialized]);
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
@@ -51,8 +77,8 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         />
       </div>
 
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+      <div className="text-xs text-green-500 font-medium">
+        ✓ State is now persisted to LocalStorage
       </div>
     </div>
   );
