@@ -1,7 +1,15 @@
 import { mockLeaderboard } from "@/data/mock-leaderboard";
 
 export default function LeaderboardPage() {
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // Sort by earned (descending), then by reputation (descending) for stable ordering
+  // Fixes sorting bug: when earned values match, order becomes non-deterministic
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) {
+      return b.earned - a.earned;
+    }
+    // Secondary sort key: reputation (higher first) ensures deterministic order
+    return b.reputation - a.reputation;
+  });
 
   return (
     <div className="space-y-6">
