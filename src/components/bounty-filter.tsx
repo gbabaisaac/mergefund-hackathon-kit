@@ -1,26 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+// FIXED: Filter state now persists using URL query params
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
+  // Initialize from URL params
   const [difficulty, setDifficulty] = useState("all");
   const [minReward, setMinReward] = useState(0);
 
+  // Load initial state from URL on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const diffParam = params.get("difficulty") || "all";
+      const rewardParam = parseInt(params.get("minReward") || "0", 10);
+      
+      setDifficulty(diffParam);
+      setMinReward(rewardParam);
+      onFilterChange({ difficulty: diffParam, minReward: rewardParam });
+    }
+  }, []);
+
+  const updateURL = (diff: string, reward: number) => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      params.set("difficulty", diff);
+      params.set("minReward", reward.toString());
+      window.history.replaceState({}, "", `${window.location.pathname}?${params}`);
+    }
+  };
+
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
+    updateURL(value, minReward);
     onFilterChange({ difficulty: value, minReward });
   };
 
   const handleMinRewardChange = (value: number) => {
     setMinReward(value);
+    updateURL(difficulty, value);
     onFilterChange({ difficulty, minReward: value });
   };
 
@@ -51,8 +74,8 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         />
       </div>
 
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+      <div className="text-xs text-green-600">
+        ✓ Fixed: Filters now persist on refresh!
       </div>
     </div>
   );
