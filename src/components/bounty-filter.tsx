@@ -1,27 +1,40 @@
 "use client";
 
-import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  // Initialize from URL params or default
+  const [difficulty, setDifficulty] = useState(searchParams.get("difficulty") || "all");
+  const [minReward, setMinReward] = useState(Number(searchParams.get("minReward")) || 0);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (difficulty !== "all") params.set("difficulty", difficulty);
+    if (minReward > 0) params.set("minReward", minReward.toString());
+    
+    const newUrl = params.toString() 
+      ? `?${params.toString()}`
+      : window.location.pathname;
+    
+    router.replace(newUrl, { scroll: false });
+    onFilterChange({ difficulty, minReward });
+  }, [difficulty, minReward, router, onFilterChange]);
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
-    onFilterChange({ difficulty: value, minReward });
   };
 
   const handleMinRewardChange = (value: number) => {
     setMinReward(value);
-    onFilterChange({ difficulty, minReward: value });
   };
 
   return (
@@ -31,7 +44,7 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         <select
           value={difficulty}
           onChange={(e) => handleDifficultyChange(e.target.value)}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         >
           <option value="all">All</option>
           <option value="Easy">Easy</option>
@@ -39,20 +52,18 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
           <option value="Hard">Hard</option>
         </select>
       </div>
-
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-slate-600">Min Reward:</label>
         <input
-          type="number"
+          type="range"
+          min="0"
+          max="500"
+          step="50"
           value={minReward}
           onChange={(e) => handleMinRewardChange(Number(e.target.value))}
-          className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          placeholder="0"
+          className="w-32"
         />
-      </div>
-
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+        <span className="text-sm text-slate-600">${minReward}+</span>
       </div>
     </div>
   );
