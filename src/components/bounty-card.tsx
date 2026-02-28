@@ -4,6 +4,17 @@ type BountyCardProps = {
   tags: string[];
   difficulty: "Easy" | "Medium" | "Hard";
   progress: number;
+  onClick?: () => void;
+};
+
+// Format currency with comma separators
+const formatReward = (amount: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
 };
 
 const difficultyStyles = {
@@ -12,9 +23,14 @@ const difficultyStyles = {
   Hard: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-export function BountyCard({ title, reward, tags, difficulty, progress }: BountyCardProps) {
+export function BountyCard({ title, reward, tags, difficulty, progress, onClick }: BountyCardProps) {
   return (
-    <div className="card p-4 sm:p-5 hover:shadow-md transition">
+    <div 
+      className="card p-4 sm:p-5 hover:shadow-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-base sm:text-lg font-semibold leading-snug break-words">{title}</h3>
@@ -27,7 +43,7 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
           </div>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-xl sm:text-xl font-bold">${reward}</div>
+          <div className="text-xl sm:text-xl font-bold">{formatReward(reward)}</div>
           <span className={`mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap ${difficultyStyles[difficulty]}`}>
             {difficulty}
           </span>
@@ -40,8 +56,8 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
         </div>
         <div className="mt-1.5 h-2 w-full rounded-full bg-slate-100">
           <div
-            className="h-2 rounded-full bg-brand-600"
-            style={{ width: `${progress}%` }}
+            className="h-2 rounded-full bg-brand-600 transition-all duration-300"
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
           />
         </div>
       </div>
