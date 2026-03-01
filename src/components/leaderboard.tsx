@@ -1,8 +1,9 @@
 "use client";
 
-// BUG: Sorting algorithm doesn't handle ties correctly
-// When two users have the same earnings, their relative order is inconsistent
-// FIX: Add secondary sort key (e.g., by name or join date)
+// FIXED: Sorting algorithm now handles ties correctly
+// Primary sort: by earnings (descending)
+// Secondary sort: by bounties_completed (descending)
+// Tertiary sort: by name (ascending) for deterministic ordering
 
 type LeaderboardEntry = {
   id: string;
@@ -23,13 +24,26 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export function Leaderboard() {
-  // BUG: This sort is unstable - tied entries will have inconsistent ordering
-  // The sort only compares by earned, but when earned values are equal,
-  // the result depends on the browser's sort implementation (which may vary)
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // FIXED: Stable sort with multiple keys
+  // 1. Primary: earnings (descending)
+  // 2. Secondary: bounties_completed (descending)
+  // 3. Tertiary: name (ascending) for deterministic ordering
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    if (b.bounties_completed !== a.bounties_completed) return b.bounties_completed - a.bounties_completed;
+    return a.name.localeCompare(b.name);
+  });
 
-  // BUG: Rank calculation doesn't account for ties properly
-  // Users with the same earnings should have the same rank
+  // FIXED: Calculate ranks accounting for ties
+  // Users with the same earnings get the same rank
+  const getRank = (index: number): number => {
+    if (index === 0) return 1;
+    if (sorted[index].earned === sorted[index - 1].earned) {
+      return getRank(index - 1); // Same rank as previous
+    }
+    return index + 1;
+  };
+
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">Top Earners</h3>
@@ -39,9 +53,9 @@ export function Leaderboard() {
             key={entry.id}
             className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
           >
-            {/* BUG: Rank is just index+1, doesn't handle ties */}
+            {/* FIXED: Rank now correctly handles ties */}
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
-              {index + 1}
+              {getRank(index)}
             </span>
             <img
               src={entry.avatar}
@@ -64,10 +78,10 @@ export function Leaderboard() {
         ))}
       </div>
 
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-xs text-amber-700">
-          <strong>Bug hint:</strong> Notice how users with $35.00 and $20.00 might appear in different orders on page refresh.
-          Also, shouldn&apos;t tied users have the same rank?
+      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <p className="text-xs text-green-700">
+          <strong>Fixed:</strong> Users with the same earnings now have the same rank and deterministic ordering.
+          Ties are broken by bounties completed, then alphabetically by name.
         </p>
       </div>
     </div>
