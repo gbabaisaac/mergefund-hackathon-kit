@@ -14,7 +14,7 @@ const difficultyStyles = {
 
 export function BountyCard({ title, reward, tags, difficulty, progress }: BountyCardProps) {
   return (
-    <div className="card p-4 sm:p-5 hover:shadow-md transition">
+    <div className="card p-4 sm:p-5 hover:shadow-lg transition-all duration-200 hover:scale-[1.02] hover:border-brand-300 border border-transparent bg-white">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-base sm:text-lg font-semibold leading-snug break-words">{title}</h3>
