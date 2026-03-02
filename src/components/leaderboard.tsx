@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 // BUG: Sorting algorithm doesn't handle ties correctly
 // When two users have the same earnings, their relative order is inconsistent
 // FIX: Add secondary sort key (e.g., by name or join date)
@@ -43,14 +45,19 @@ export function Leaderboard() {
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
               {index + 1}
             </span>
-            <img
-              src={entry.avatar}
-              alt={entry.name}
-              className="w-10 h-10 rounded-full"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.name}`;
-              }}
-            />
+            <div className="relative h-10 w-10 overflow-hidden rounded-full bg-slate-200">
+              <Image
+                src={entry.avatar}
+                alt={entry.name}
+                fill
+                sizes="40px"
+                className="object-cover"
+                onError={(event) => {
+                  const target = event.currentTarget;
+                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.name)}`;
+                }}
+              />
+            </div>
             <div className="flex-1">
               <p className="font-medium">{entry.name}</p>
               <p className="text-xs text-slate-500">
