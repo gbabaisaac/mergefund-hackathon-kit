@@ -1,16 +1,31 @@
 import { mockDiscovery } from "@/data/mock-discovery";
 
 function scoreBounty(bounty: typeof mockDiscovery[number]) {
-  const fundedBoost = bounty.fundedPercent >= 80 ? 20 : bounty.fundedPercent / 4;
-  const activityBoost = bounty.claimedCount * 5;
-  const recencyBoost = Math.max(0, 14 - bounty.postedDaysAgo);
-  return fundedBoost + activityBoost + recencyBoost + bounty.reward / 50;
+  // Weighted discovery score (0-100+), optimized for relevance:
+  // - reward component: normalize bounty payout to 0-30 points (higher reward = higher priority)
+  // - funded component: 0-25 points (funded bounties are more actionable)
+  // - activity component: 0-25 points (more claimant interest indicates demand)
+  // - recency component: 0-20 points (newer bounties surface more often)
+  const rewardScore = Math.min(30, (bounty.reward / 500) * 30);
+  const fundedScore = (bounty.fundedPercent / 100) * 25;
+  const activityScore = Math.min(25, bounty.claimedCount * 6);
+  const recencyScore = Math.max(0, 20 - bounty.postedDaysAgo * 2);
+
+  return rewardScore + fundedScore + activityScore + recencyScore;
 }
 
 export default function DiscoveryPage() {
   const ranked = [...mockDiscovery]
-    .map((bounty) => ({ ...bounty, score: scoreBounty(bounty) }))
-    .sort((a, b) => b.score - a.score);
+    .map((bounty) => ({
+      ...bounty,
+      score: scoreBounty(bounty),
+    }))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      // Stable tie-breakers for deterministic ordering
+      if (b.reward !== a.reward) return b.reward - a.reward;
+      return a.postedDaysAgo - b.postedDaysAgo;
+    });
 
   return (
     <div className="space-y-6">
