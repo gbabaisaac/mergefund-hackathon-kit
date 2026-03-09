@@ -1,0 +1,6 @@
+Write-up (cause + fix):
+
+Bug 1 cause: disabled={submitting} was literally commented out, and there was no guard in the handler
+Bug 1 fix: uncommented the attribute + added a code-level if (submitting) return guard
+Bug 2 cause: no required, minLength, or min attributes, and no JS validation before onSubmit was called
+Bug 2 fix: three-layer fix — HTML attributes, a validate() function, and inline error messages
