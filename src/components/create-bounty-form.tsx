@@ -14,6 +14,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ title?: string; reward?: string }>({});
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,19 +27,21 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
     try {
       // Validation: check for empty title and negative reward
+      const newErrors: { title?: string; reward?: string } = {};
       if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
+        newErrors.title = "Title is required";
       }
       const rewardNum = Number(reward);
       if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
+        newErrors.reward = "Reward must be a positive number";
+      }
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
         isSubmittingRef.current = false;
         setSubmitting(false);
         return;
       }
+      setErrors({});
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -72,7 +75,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => { setTitle(e.target.value); setErrors((prev) => ({ ...prev, title: undefined })); }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="Bounty title"
             required
@@ -91,7 +94,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="number"
             value={reward}
-            onChange={(e) => setReward(e.target.value)}
+            onChange={(e) => { setReward(e.target.value); setErrors((prev) => ({ ...prev, reward: undefined })); }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="100"
             min="1"
