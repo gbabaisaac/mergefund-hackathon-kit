@@ -1,18 +1,45 @@
 "use client";
 
-import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL query params so filters survive page refresh
+  const [difficulty, setDifficulty] = useState(() => {
+    return searchParams.get("difficulty") ?? "all";
+  });
+  const [minReward, setMinReward] = useState(() => {
+    const raw = searchParams.get("minReward");
+    return raw ? Number(raw) : 0;
+  });
+
+  // Track whether we've done the initial URL-based sync
+  const initialSyncDone = useRef(false);
+
+  useEffect(() => {
+    if (!initialSyncDone.current) {
+      // On mount, sync URL params to parent state so filtered results match
+      onFilterChange({ difficulty, minReward });
+      initialSyncDone.current = true;
+    }
+  }, [difficulty, minReward, onFilterChange]);
+
+  // Persist filter changes to URL query params so they survive page refresh
+  useEffect(() => {
+    if (!initialSyncDone.current) return; // skip until initial sync is done
+    const params = new URLSearchParams();
+    if (difficulty !== "all") params.set("difficulty", difficulty);
+    if (minReward > 0) params.set("minReward", String(minReward));
+    const query = params.toString();
+    router.replace(query ? `?${query}` : "/", { scroll: false });
+  }, [difficulty, minReward, router]);
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
@@ -51,8 +78,8 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         />
       </div>
 
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+      <div className="text-xs text-emerald-600">
+        Filters are now persisted in the URL — refresh the page and they stay!
       </div>
     </div>
   );
