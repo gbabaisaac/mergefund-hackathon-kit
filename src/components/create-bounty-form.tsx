@@ -2,8 +2,6 @@
 
 import { useRef, useState } from "react";
 
-// BUG 2: Form validation - allows negative numbers and empty titles (see validation below)
-
 type CreateBountyFormProps = {
   onSubmit: (bounty: { title: string; reward: number; difficulty: string }) => void;
 };
@@ -14,6 +12,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ title?: string; reward?: string }>({});
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,39 +23,62 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
     isSubmittingRef.current = true;
     setSubmitting(true);
 
-    try {
-      // Validation: check for empty title and negative reward
-      if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
-      const rewardNum = Number(reward);
-      if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
+    // Collect validation errors
+    const validationErrors: { title?: string; reward?: string } = {};
+    if (!title.trim()) {
+      validationErrors.title = "Title is required";
+    }
+    const rewardNum = Number(reward);
+    if (!reward || isNaN(rewardNum) || rewardNum <= 0) {
+      validationErrors.reward = "Reward must be a positive number";
+    }
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const timestamp = new Date().toISOString();
-      setSubmissions((prev) => [...prev, `${title} - $${reward} at ${timestamp}`]);
-
-      onSubmit({
-        title,
-        reward: Number(reward),
-        difficulty,
-      });
-
-      setTitle("");
-      setReward("");
-    } finally {
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       isSubmittingRef.current = false;
       setSubmitting(false);
+      return;
+    }
+
+    setErrors({});
+
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const timestamp = new Date().toISOString();
+    setSubmissions((prev) => [...prev, `${title} - $${reward} at ${timestamp}`]);
+
+    onSubmit({
+      title,
+      reward: Number(reward),
+      difficulty,
+    });
+
+    setTitle("");
+    setReward("");
+    isSubmittingRef.current = false;
+    setSubmitting(false);
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    if (errors.title) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.title;
+        return next;
+      });
+    }
+  };
+
+  const handleRewardChange = (value: string) => {
+    setReward(value);
+    if (errors.reward) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.reward;
+        return next;
+      });
     }
   };
 
@@ -72,15 +94,20 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2"
+            onChange={(e) => handleTitleChange(e.target.value)}
+            className={`w-full rounded-lg border px-3 py-2 ${
+              errors.title
+                ? "border-red-400 bg-red-50 focus:border-red-500"
+                : "border-slate-200 focus:border-brand-500"
+            }`}
             placeholder="Bounty title"
             required
             minLength={1}
           />
-          {/* FIX 2: Show validation error */}
           {errors.title && (
-            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+            <p className="text-red-500 text-xs mt-1 font-medium" role="alert">
+              {errors.title}
+            </p>
           )}
         </div>
 
@@ -91,14 +118,19 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="number"
             value={reward}
-            onChange={(e) => setReward(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2"
+            onChange={(e) => handleRewardChange(e.target.value)}
+            className={`w-full rounded-lg border px-3 py-2 ${
+              errors.reward
+                ? "border-red-400 bg-red-50 focus:border-red-500"
+                : "border-slate-200 focus:border-brand-500"
+            }`}
             placeholder="100"
             min="1"
           />
-          {/* FIX 2: Show validation error */}
           {errors.reward && (
-            <p className="text-red-500 text-xs mt-1">{errors.reward}</p>
+            <p className="text-red-500 text-xs mt-1 font-medium" role="alert">
+              {errors.reward}
+            </p>
           )}
         </div>
 
@@ -117,7 +149,6 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           </select>
         </div>
 
-        {/* FIX 1: Disable button while submitting */}
         <button
           type="submit"
           className="btn w-full"
@@ -130,7 +161,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
       {submissions.length > 0 && (
         <div className="mt-4 p-3 bg-slate-50 rounded-lg">
           <p className="text-xs font-semibold text-slate-500 mb-2">
-            Submissions (click rapidly to see the bug!):
+            Submissions:
           </p>
           <ul className="text-xs text-slate-600 space-y-1">
             {submissions.map((s, i) => (
