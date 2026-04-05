@@ -13,6 +13,8 @@ body {
 
 .card {
   @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800;
+  @apply transition-all duration-200 ease-out;
+  @apply hover:shadow-lg hover:-translate-y-0.5 hover:border-brand-200 dark:hover:border-brand-700;
 }
 
 .pill {
