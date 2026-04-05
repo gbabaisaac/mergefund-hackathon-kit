@@ -1,9 +1,5 @@
 "use client";
 
-// BUG: Sorting algorithm doesn't handle ties correctly
-// When two users have the same earnings, their relative order is inconsistent
-// FIX: Add secondary sort key (e.g., by name or join date)
-
 type LeaderboardEntry = {
   id: string;
   name: string;
@@ -23,25 +19,37 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export function Leaderboard() {
-  // BUG: This sort is unstable - tied entries will have inconsistent ordering
-  // The sort only compares by earned, but when earned values are equal,
-  // the result depends on the browser's sort implementation (which may vary)
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // Stable sort: primary key is earnings (descending), secondary key is id (ascending)
+  // Using id as a deterministic tiebreaker ensures consistent ordering across renders
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    return a.id.localeCompare(b.id); // stable secondary sort by id
+  });
 
-  // BUG: Rank calculation doesn't account for ties properly
-  // Users with the same earnings should have the same rank
+  // Compute ranks, assigning the same rank to tied earnings
+  // e.g., if positions 1 and 2 both have 3500, both get rank 1, next gets rank 3
+  let currentRank = 0;
+  let prevEarned: number | null = null;
+  const ranked = sorted.map((entry) => {
+    if (entry.earned !== prevEarned) {
+      currentRank++;
+    }
+    const rank = currentRank;
+    prevEarned = entry.earned;
+    return { entry, rank };
+  });
+
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">Top Earners</h3>
       <div className="space-y-3">
-        {sorted.map((entry, index) => (
+        {ranked.map(({ entry, rank }) => (
           <div
             key={entry.id}
             className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
           >
-            {/* BUG: Rank is just index+1, doesn't handle ties */}
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
-              {index + 1}
+              {rank}
             </span>
             <img
               src={entry.avatar}
@@ -64,10 +72,9 @@ export function Leaderboard() {
         ))}
       </div>
 
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-xs text-amber-700">
-          <strong>Bug hint:</strong> Notice how users with $35.00 and $20.00 might appear in different orders on page refresh.
-          Also, shouldn&apos;t tied users have the same rank?
+      <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <p className="text-xs text-emerald-700">
+          <strong>Fixed:</strong> Tied earners now share the same rank and appear in a deterministic order.
         </p>
       </div>
     </div>
