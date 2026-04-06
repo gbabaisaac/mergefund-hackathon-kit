@@ -23,4 +23,20 @@ export const mockBounties = [
     difficulty: "Hard" as const,
     progress: 10,
   },
+  {
+    id: "bounty-4",
+    title: "Dark mode support for dashboard",
+    reward: 180,
+    tags: ["frontend", "ui", "accessibility"],
+    difficulty: "Easy" as const,
+    progress: 100,
+  },
+  {
+    id: "bounty-5",
+    title: "Real-time notifications system",
+    reward: 350,
+    tags: ["backend", "websockets"],
+    difficulty: "Hard" as const,
+    progress: 5,
+  },
 ];
