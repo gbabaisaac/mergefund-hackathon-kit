@@ -1,26 +1,41 @@
 "use client";
 
 import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useRouter, useSearchParams } from "next/navigation";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL query params so filters survive page refresh
+  const initialDifficulty = searchParams.get("difficulty") ?? "all";
+  const initialMinReward = Number(searchParams.get("minReward") ?? "0");
+
+  const [difficulty, setDifficulty] = useState(initialDifficulty);
+  const [minReward, setMinReward] = useState(initialMinReward);
+
+  /** Update URL params whenever a filter changes — keeps state in sync with the URL */
+  function updateUrlParams(nextDifficulty: string, nextMinReward: number) {
+    const params = new URLSearchParams();
+    if (nextDifficulty !== "all") params.set("difficulty", nextDifficulty);
+    if (nextMinReward > 0) params.set("minReward", String(nextMinReward));
+    const queryString = params.toString();
+    router.replace(queryString ? `?${queryString}` : "/bugs/filter", { scroll: false });
+  }
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
+    updateUrlParams(value, minReward);
     onFilterChange({ difficulty: value, minReward });
   };
 
   const handleMinRewardChange = (value: number) => {
     setMinReward(value);
+    updateUrlParams(difficulty, value);
     onFilterChange({ difficulty, minReward: value });
   };
 
@@ -51,8 +66,8 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         />
       </div>
 
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+      <div className="text-xs text-green-600">
+        ✓ Filter state is now persisted to the URL — refresh the page!
       </div>
     </div>
   );

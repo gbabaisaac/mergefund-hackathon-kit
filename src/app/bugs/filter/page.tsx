@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { BountyFilter } from "@/components/bounty-filter";
 
 const mockBounties = [
@@ -29,11 +29,13 @@ export default function FilterBugPage() {
       <div className="card p-6">
         <h1 className="text-2xl font-bold">Bug: Filter State Not Persisted</h1>
         <p className="mt-2 text-slate-600">
-          Set some filters below, then refresh the page. Notice how the filters reset!
+          Set some filters below, then refresh the page. Filter state now persists via URL query params!
         </p>
       </div>
 
-      <BountyFilter onFilterChange={setFilters} />
+      <Suspense fallback={<div className="card p-4 text-sm text-slate-400">Loading filters…</div>}>
+        <BountyFilter onFilterChange={setFilters} />
+      </Suspense>
 
       <div className="card p-6">
         <h2 className="text-lg font-semibold mb-4">
@@ -55,12 +57,12 @@ export default function FilterBugPage() {
         </div>
       </div>
 
-      <div className="card p-6 bg-blue-50 border-blue-200">
-        <h3 className="font-semibold text-blue-800">Your Task</h3>
-        <p className="mt-2 text-sm text-blue-700">
-          Fix the <code className="bg-blue-100 px-1 rounded">BountyFilter</code> component
-          in <code className="bg-blue-100 px-1 rounded">src/components/bounty-filter.tsx</code>
-          to persist filter state across page refreshes using URL query parameters or localStorage.
+      <div className="card p-6 bg-green-50 border-green-200">
+        <h3 className="font-semibold text-green-800">✓ Fixed</h3>
+        <p className="mt-2 text-sm text-green-700">
+          The <code className="bg-green-100 px-1 rounded">BountyFilter</code> component
+          now initializes state from URL query params and updates the URL on every filter change.
+          Refresh the page — filters persist! Tech used: Next.js <code>useSearchParams</code> + <code>router.replace</code>.
         </p>
       </div>
     </div>
