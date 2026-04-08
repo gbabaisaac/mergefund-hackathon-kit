@@ -22,11 +22,12 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || trimmedTitle.length === 0) {
       newErrors.title = "Title is required";
     }
     const rewardNum = Number(reward);
-    if (!reward || isNaN(rewardNum) || rewardNum <= 0) {
+    if (!reward || isNaN(rewardNum) || rewardNum <= 0 || rewardNum < 0) {
       newErrors.reward = "Reward must be a positive number";
     }
     setErrors(newErrors);
@@ -129,7 +130,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
         <button
           type="submit"
           className="btn w-full"
-          disabled={submitting}
+          disabled={submitting || !title.trim() || !reward || Number(reward) <= 0}
         >
           {submitting ? "Creating..." : "Create Bounty"}
         </button>
