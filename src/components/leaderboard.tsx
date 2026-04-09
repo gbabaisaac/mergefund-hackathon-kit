@@ -1,9 +1,5 @@
 "use client";
 
-// BUG: Sorting algorithm doesn't handle ties correctly
-// When two users have the same earnings, their relative order is inconsistent
-// FIX: Add secondary sort key (e.g., by name or join date)
-
 type LeaderboardEntry = {
   id: string;
   name: string;
@@ -12,7 +8,6 @@ type LeaderboardEntry = {
   bounties_completed: number;
 };
 
-// Mock data with intentional ties in earnings
 const mockLeaderboard: LeaderboardEntry[] = [
   { id: "1", name: "alice_dev", avatar: "https://github.com/alice.png", earned: 5000, bounties_completed: 10 },
   { id: "2", name: "bob_coder", avatar: "https://github.com/bob.png", earned: 3500, bounties_completed: 7 },
@@ -23,25 +18,34 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export function Leaderboard() {
-  // BUG: This sort is unstable - tied entries will have inconsistent ordering
-  // The sort only compares by earned, but when earned values are equal,
-  // the result depends on the browser's sort implementation (which may vary)
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // FIX: Stable sort using multiple keys for deterministic ordering.
+  // Primary: earned descending.
+  // Secondary: bounties_completed descending (more bounties = higher among ties).
+  // Tertiary: name ascending (alphabetical for consistent tie-breaking).
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    if (b.bounties_completed !== a.bounties_completed) return b.bounties_completed - a.bounties_completed;
+    return a.name.localeCompare(b.name);
+  });
 
-  // BUG: Rank calculation doesn't account for ties properly
-  // Users with the same earnings should have the same rank
+  // FIX: Assign competition-style ranks (1, 2, 2, 4, ...) where tied entries share the same rank.
+  // rank = 1 + number of entries with strictly higher earnings.
+  const entriesWithRanks = sorted.map((entry) => {
+    const higherEarningsCount = sorted.filter((e) => e.earned > entry.earned).length;
+    return { ...entry, rank: higherEarningsCount + 1 };
+  });
+
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">Top Earners</h3>
       <div className="space-y-3">
-        {sorted.map((entry, index) => (
+        {entriesWithRanks.map(({ rank, ...entry }) => (
           <div
             key={entry.id}
             className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
           >
-            {/* BUG: Rank is just index+1, doesn't handle ties */}
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
-              {index + 1}
+              {rank}
             </span>
             <img
               src={entry.avatar}
@@ -62,13 +66,6 @@ export function Leaderboard() {
             </span>
           </div>
         ))}
-      </div>
-
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-xs text-amber-700">
-          <strong>Bug hint:</strong> Notice how users with $35.00 and $20.00 might appear in different orders on page refresh.
-          Also, shouldn&apos;t tied users have the same rank?
-        </p>
       </div>
     </div>
   );

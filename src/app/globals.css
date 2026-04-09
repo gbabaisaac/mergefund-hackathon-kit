@@ -16,7 +16,7 @@ body {
 }
 
 .pill {
-  @apply inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-slate-600 dark:text-slate-400;
+  @apply inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors duration-150 dark:border-slate-600 dark:text-slate-400;
 }
 
 .btn {
