@@ -1,28 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+// FIX: Filter state is now persisted to URL query params
+// - Filters survive page refresh
+// - Shareable URLs with filter state
+// - Read initial state from URL on mount
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Initialize from URL params on mount
+  const [difficulty, setDifficulty] = useState(searchParams.get("difficulty") || "all");
+  const [minReward, setMinReward] = useState(() => {
+    const urlVal = searchParams.get("minReward");
+    return urlVal ? Number(urlVal) : 0;
+  });
+
+  // Sync filter changes to URL
+  const updateUrl = useCallback((diff: string, reward: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (diff && diff !== "all") {
+      params.set("difficulty", diff);
+    } else {
+      params.delete("difficulty");
+    }
+    if (reward > 0) {
+      params.set("minReward", String(reward));
+    } else {
+      params.delete("minReward");
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [searchParams, pathname, router]);
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
     onFilterChange({ difficulty: value, minReward });
+    updateUrl(value, minReward);
   };
 
   const handleMinRewardChange = (value: number) => {
     setMinReward(value);
     onFilterChange({ difficulty, minReward: value });
+    updateUrl(difficulty, value);
   };
+
+  // Notify parent of initial state from URL
+  useEffect(() => {
+    onFilterChange({ difficulty, minReward });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="card p-4 flex flex-wrap gap-4 items-center">
@@ -52,7 +87,7 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
       </div>
 
       <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+        (Filters persist across page refresh via URL params)
       </div>
     </div>
   );

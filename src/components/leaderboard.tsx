@@ -1,8 +1,8 @@
 "use client";
 
-// BUG: Sorting algorithm doesn't handle ties correctly
-// When two users have the same earnings, their relative order is inconsistent
-// FIX: Add secondary sort key (e.g., by name or join date)
+// FIX: Sorting algorithm now handles ties correctly with deterministic ordering
+// - Stable sort with secondary key (name) ensures consistent ordering when earnings are equal
+// - Rank calculation properly handles ties: users with the same earnings get the same rank
 
 type LeaderboardEntry = {
   id: string;
@@ -23,52 +23,58 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export function Leaderboard() {
-  // BUG: This sort is unstable - tied entries will have inconsistent ordering
-  // The sort only compares by earned, but when earned values are equal,
-  // the result depends on the browser's sort implementation (which may vary)
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // FIX: Stable sort with secondary key (name) for deterministic ordering when earnings are equal
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    return a.name.localeCompare(b.name); // secondary key: alphabetical by name
+  });
 
-  // BUG: Rank calculation doesn't account for ties properly
-  // Users with the same earnings should have the same rank
+  // FIX: Compute rank properly, skipping ranks for ties
+  // Build an array of unique earned values in descending order
+  const uniqueEarnings = [...new Set(mockLeaderboard.map(e => e.earned))].sort((a, b) => b - a);
+  const rankOf = (earned: number) => uniqueEarnings.indexOf(earned) + 1;
+
+  const getRankStyle = (rank: number) => {
+    if (rank === 1) return 'bg-amber-100 text-amber-700';
+    if (rank === 2) return 'bg-slate-200 text-slate-600';
+    if (rank === 3) return 'bg-orange-100 text-orange-700';
+    return 'bg-slate-200 text-slate-600';
+  };
+
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">Top Earners</h3>
       <div className="space-y-3">
-        {sorted.map((entry, index) => (
-          <div
-            key={entry.id}
-            className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
-          >
-            {/* BUG: Rank is just index+1, doesn't handle ties */}
-            <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
-              {index + 1}
-            </span>
-            <img
-              src={entry.avatar}
-              alt={entry.name}
-              className="w-10 h-10 rounded-full"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.name}`;
-              }}
-            />
-            <div className="flex-1">
-              <p className="font-medium">{entry.name}</p>
-              <p className="text-xs text-slate-500">
-                {entry.bounties_completed} bounties completed
-              </p>
+        {sorted.map((entry) => {
+          const rank = rankOf(entry.earned);
+          return (
+            <div
+              key={entry.id}
+              className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
+            >
+              <span className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold ${getRankStyle(rank)}`}>
+                {rank}
+              </span>
+              <img
+                src={entry.avatar}
+                alt={entry.name}
+                className="w-10 h-10 rounded-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${entry.name}`;
+                }}
+              />
+              <div className="flex-1">
+                <p className="font-medium">{entry.name}</p>
+                <p className="text-xs text-slate-500">
+                  {entry.bounties_completed} bounties completed
+                </p>
+              </div>
+              <span className="font-bold text-green-600">
+                ${(entry.earned / 100).toFixed(2)}
+              </span>
             </div>
-            <span className="font-bold text-green-600">
-              ${(entry.earned / 100).toFixed(2)}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-xs text-amber-700">
-          <strong>Bug hint:</strong> Notice how users with $35.00 and $20.00 might appear in different orders on page refresh.
-          Also, shouldn&apos;t tied users have the same rank?
-        </p>
+          );
+        })}
       </div>
     </div>
   );
