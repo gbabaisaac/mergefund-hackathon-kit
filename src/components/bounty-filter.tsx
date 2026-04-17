@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Initialize from URL query params on mount
+  const [difficulty, setDifficulty] = useState(() => searchParams.get("difficulty") || "all");
+  const [minReward, setMinReward] = useState(() => {
+    const fromUrl = searchParams.get("minReward");
+    return fromUrl ? Number(fromUrl) : 0;
+  });
+
+  // Sync state changes to URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (difficulty !== "all") params.set("difficulty", difficulty);
+    if (minReward > 0) params.set("minReward", String(minReward));
+    const query = params.toString();
+    router.replace(query ? `?${query}` : "/", { scroll: false });
+  }, [difficulty, minReward, router]);
+
+  // Notify parent of initial filter values
+  useEffect(() => {
+    onFilterChange({ difficulty, minReward });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
@@ -52,7 +70,7 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
       </div>
 
       <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
+        Filter state persists on refresh
       </div>
     </div>
   );
