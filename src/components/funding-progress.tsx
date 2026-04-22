@@ -40,8 +40,9 @@ export function FundingProgress({ funded, target, title }: FundingProgressProps)
           ${funded} / ${target}
           {/* Show actual percentage (capped at 100% for display) */}
           <span className="ml-2 text-xs">
-            ({percentage.toFixed(0)}%{rawPercentage > 100 && " (over-funded)"})
+            ({rawPercentage.toFixed(0)}%{rawPercentage > 100 && " (over-funded)"})
           </span>
+
         </span>
       </div>
       <div className="h-3 bg-slate-200 rounded-full overflow-hidden">

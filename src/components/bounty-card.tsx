@@ -41,8 +41,9 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
         <div className="mt-1.5 h-2 w-full rounded-full bg-slate-100">
           <div
             className="h-2 rounded-full bg-brand-600"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${Math.min(progress, 100)}%` }}
           />
+
         </div>
       </div>
     </div>
