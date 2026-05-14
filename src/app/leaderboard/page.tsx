@@ -1,7 +1,8 @@
 import { mockLeaderboard } from "@/data/mock-leaderboard";
+import { rankLeaderboardEntries } from "@/lib/leaderboard";
 
 export default function LeaderboardPage() {
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  const ranked = rankLeaderboardEntries(mockLeaderboard);
 
   return (
     <div className="space-y-6">
@@ -19,12 +20,12 @@ export default function LeaderboardPage() {
           <div>Bounties</div>
           <div>Total Earned</div>
         </div>
-        {sorted.map((dev, index) => (
+        {ranked.map((dev) => (
           <div
             key={dev.id}
             className="grid grid-cols-5 gap-3 px-5 py-4 text-sm border-b border-slate-100 last:border-b-0"
           >
-            <div className="font-semibold">#{index + 1}</div>
+            <div className="font-semibold">#{dev.rank}</div>
             <div className="col-span-2">
               <div className="font-semibold">{dev.name}</div>
               <div className="text-xs text-slate-500">Reputation {dev.reputation}</div>
