@@ -1,27 +1,66 @@
 "use client";
 
-import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useEffect, useState } from "react";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
+const validDifficulties = new Set(["all", "Easy", "Medium", "Hard"]);
+
+function readFiltersFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const difficultyParam = params.get("difficulty") ?? "all";
+  const minRewardParam = Number(params.get("minReward") ?? 0);
+
+  return {
+    difficulty: validDifficulties.has(difficultyParam) ? difficultyParam : "all",
+    minReward: Number.isFinite(minRewardParam) && minRewardParam > 0 ? minRewardParam : 0,
+  };
+}
+
+function writeFiltersToUrl(filters: { difficulty: string; minReward: number }) {
+  const url = new URL(window.location.href);
+
+  if (filters.difficulty === "all") {
+    url.searchParams.delete("difficulty");
+  } else {
+    url.searchParams.set("difficulty", filters.difficulty);
+  }
+
+  if (filters.minReward > 0) {
+    url.searchParams.set("minReward", String(filters.minReward));
+  } else {
+    url.searchParams.delete("minReward");
+  }
+
+  window.history.replaceState(null, "", url);
+}
+
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
   const [difficulty, setDifficulty] = useState("all");
   const [minReward, setMinReward] = useState(0);
 
+  useEffect(() => {
+    const filters = readFiltersFromUrl();
+    setDifficulty(filters.difficulty);
+    setMinReward(filters.minReward);
+    onFilterChange(filters);
+  }, [onFilterChange]);
+
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
-    onFilterChange({ difficulty: value, minReward });
+    const filters = { difficulty: value, minReward };
+    writeFiltersToUrl(filters);
+    onFilterChange(filters);
   };
 
   const handleMinRewardChange = (value: number) => {
-    setMinReward(value);
-    onFilterChange({ difficulty, minReward: value });
+    const nextMinReward = Number.isFinite(value) && value > 0 ? value : 0;
+    setMinReward(nextMinReward);
+    const filters = { difficulty, minReward: nextMinReward };
+    writeFiltersToUrl(filters);
+    onFilterChange(filters);
   };
 
   return (
@@ -51,9 +90,7 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
         />
       </div>
 
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
-      </div>
+      <div className="text-xs text-slate-400">Filters are saved in the page URL.</div>
     </div>
   );
 }

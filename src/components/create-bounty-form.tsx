@@ -8,12 +8,18 @@ type CreateBountyFormProps = {
   onSubmit: (bounty: { title: string; reward: number; difficulty: string }) => void;
 };
 
+type FormErrors = {
+  title?: string;
+  reward?: string;
+};
+
 export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [title, setTitle] = useState("");
   const [reward, setReward] = useState("");
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,19 +32,23 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
     try {
       // Validation: check for empty title and negative reward
+      const nextErrors: FormErrors = {};
       if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
+        nextErrors.title = "Title is required";
       }
+
       const rewardNum = Number(reward);
       if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
+        nextErrors.reward = "Reward must be a positive number";
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors(nextErrors);
         isSubmittingRef.current = false;
         setSubmitting(false);
         return;
       }
+      setErrors({});
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -72,7 +82,10 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setErrors((prev) => ({ ...prev, title: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="Bounty title"
             required
@@ -91,7 +104,10 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="number"
             value={reward}
-            onChange={(e) => setReward(e.target.value)}
+            onChange={(e) => {
+              setReward(e.target.value);
+              setErrors((prev) => ({ ...prev, reward: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="100"
             min="1"
