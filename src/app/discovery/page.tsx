@@ -1,10 +1,21 @@
 import { mockDiscovery } from "@/data/mock-discovery";
 
+/**
+ * Enhanced scoring function for bounty relevance.
+ * Logic:
+ * 1. Reward Weight (40%): Logarithmic scaling ensures higher rewards are prioritized without 
+ *    overshadowing small tasks. log2(reward) * 5.
+ * 2. Funding Status (30%): Higher funding percentage increases confidence. fundedPercent / 5.
+ * 3. Recency (20%): Newer bounties need more exposure. Linear decay over 30 days. max(0, 30 - postedDaysAgo) / 2.
+ * 4. Activity/Trending (10%): Shows community validation. claimedCount * 2.
+ */
 function scoreBounty(bounty: typeof mockDiscovery[number]) {
-  const fundedBoost = bounty.fundedPercent >= 80 ? 20 : bounty.fundedPercent / 4;
-  const activityBoost = bounty.claimedCount * 5;
-  const recencyBoost = Math.max(0, 14 - bounty.postedDaysAgo);
-  return fundedBoost + activityBoost + recencyBoost + bounty.reward / 50;
+  const rewardFactor = Math.log2(Math.max(1, bounty.reward)) * 5;
+  const fundingFactor = bounty.fundedPercent / 5;
+  const recencyFactor = Math.max(0, 30 - bounty.postedDaysAgo) / 2;
+  const activityFactor = bounty.claimedCount * 2;
+  
+  return rewardFactor + fundingFactor + recencyFactor + activityFactor;
 }
 
 export default function DiscoveryPage() {
