@@ -1,16 +1,43 @@
 import { mockDiscovery } from "@/data/mock-discovery";
 
+type DiscoveryBounty = typeof mockDiscovery[number];
+
+function calculateScoreBreakdown(bounty: DiscoveryBounty) {
+  // Funding signals sponsor confidence. Cap the boost so one highly funded bounty
+  // does not overwhelm active, recent opportunities.
+  const funding = Math.min(bounty.fundedPercent, 100) * 0.3;
+
+  // Activity suggests market demand, but each additional claim matters a little
+  // less so crowded bounties do not always dominate the list.
+  const activity = Math.sqrt(bounty.claimedCount) * 12;
+
+  // Newer bounties should surface while they are still actionable.
+  const recency = Math.max(0, 14 - bounty.postedDaysAgo) * 1.5;
+
+  // Reward is important, but scaled down to avoid turning discovery into a
+  // simple highest-dollar sort.
+  const reward = bounty.reward * 0.06;
+
+  return { funding, activity, recency, reward };
+}
+
 function scoreBounty(bounty: typeof mockDiscovery[number]) {
-  const fundedBoost = bounty.fundedPercent >= 80 ? 20 : bounty.fundedPercent / 4;
-  const activityBoost = bounty.claimedCount * 5;
-  const recencyBoost = Math.max(0, 14 - bounty.postedDaysAgo);
-  return fundedBoost + activityBoost + recencyBoost + bounty.reward / 50;
+  const breakdown = calculateScoreBreakdown(bounty);
+  return Object.values(breakdown).reduce((total, value) => total + value, 0);
 }
 
 export default function DiscoveryPage() {
   const ranked = [...mockDiscovery]
-    .map((bounty) => ({ ...bounty, score: scoreBounty(bounty) }))
-    .sort((a, b) => b.score - a.score);
+    .map((bounty) => ({
+      ...bounty,
+      score: scoreBounty(bounty),
+      scoreBreakdown: calculateScoreBreakdown(bounty),
+    }))
+    .sort((a, b) => {
+      const scoreDiff = b.score - a.score;
+      if (scoreDiff !== 0) return scoreDiff;
+      return b.reward - a.reward;
+    });
 
   return (
     <div className="space-y-6">
@@ -51,8 +78,15 @@ export default function DiscoveryPage() {
                 Posted: <span className="font-semibold text-slate-900">{bounty.postedDaysAgo}d ago</span>
               </div>
             </div>
-            <div className="mt-3 text-xs text-slate-500">
-              Score: <span className="font-semibold text-brand-700">{bounty.score.toFixed(1)}</span>
+            <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
+              <span>
+                Score: <span className="font-semibold text-brand-700">{bounty.score.toFixed(1)}</span>
+              </span>
+              <span className="text-right">
+                Funding {bounty.scoreBreakdown.funding.toFixed(1)} · Activity{" "}
+                {bounty.scoreBreakdown.activity.toFixed(1)} · Recency{" "}
+                {bounty.scoreBreakdown.recency.toFixed(1)}
+              </span>
             </div>
           </div>
         ))}
