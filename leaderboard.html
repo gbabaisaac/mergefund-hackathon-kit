@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mergefund Leaderboard</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 2rem; color: #1e293b; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        h1 { text-align: center; margin-bottom: 2rem; color: #0f172a; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; font-weight: 600; cursor: pointer; user-select: none; transition: background 0.2s; }
+        th:hover { background: #e2e8f0; }
+        .rank { font-weight: bold; color: #3b82f6; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; margin-right: 0.5rem; }
+        @media (max-width: 600px) {
+            body { padding: 1rem; }
+            .container { padding: 1rem; }
+            th, td { padding: 0.75rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Global Leaderboard</h1>
+        <div class="table-container">
+            <table id="leaderboard">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0, 'number')">Rank ↕</th>
+                        <th onclick="sortTable(1, 'string')">Contributor ↕</th>
+                        <th onclick="sortTable(2, 'number')">Total Earned ($) ↕</th>
+                        <th onclick="sortTable(3, 'number')">Bounties ↕</th>
+                        <th onclick="sortTable(4, 'number')">Reputation ↕</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <!-- Data injected via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { rank: 1, name: "Alice Hacker", avatar: "https://ui-avatars.com/api/?name=Alice+Hacker&background=random", earned: 4500, bounties: 12, rep: 980 },
+            { rank: 2, name: "Bob Builder", avatar: "https://ui-avatars.com/api/?name=Bob+Builder&background=random", earned: 3200, bounties: 8, rep: 840 },
+            { rank: 3, name: "Charlie Dev", avatar: "https://ui-avatars.com/api/?name=Charlie+Dev&background=random", earned: 2100, bounties: 5, rep: 720 },
+            { rank: 4, name: "Diana Code", avatar: "https://ui-avatars.com/api/?name=Diana+Code&background=random", earned: 5600, bounties: 15, rep: 1050 },
+            { rank: 5, name: "Eve Script", avatar: "https://ui-avatars.com/api/?name=Eve+Script&background=random", earned: 1800, bounties: 4, rep: 600 }
+        ];
+
+        const tbody = document.getElementById('tbody');
+
+        function renderTable(rows) {
+            tbody.innerHTML = '';
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="rank">#${row.rank}</td>
+                    <td><img src="${row.avatar}" class="avatar" alt="${row.name}"> ${row.name}</td>
+                    <td>$${row.earned.toLocaleString()}</td>
+                    <td>${row.bounties}</td>
+                    <td>${row.rep}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let sortDirection = {};
+        
+        function sortTable(colIndex, type) {
+            const keys = ['rank', 'name', 'earned', 'bounties', 'rep'];
+            const key = keys[colIndex];
+            
+            sortDirection[key] = !sortDirection[key];
+            const dir = sortDirection[key] ? 1 : -1;
+
+            const sorted = [...data].sort((a, b) => {
+                if (type === 'number') {
+                    return (a[key] - b[key]) * dir;
+                } else {
+                    return a[key].localeCompare(b[key]) * dir;
+                }
+            });
+
+            // Reassign ranks based on strictly 'earned' if sorted by earned? 
+            // For now just display the sorted array as is.
+            renderTable(sorted);
+        }
+
+        // Initial default sort by Earned (descending)
+        sortTable(2, 'number');
+    </script>
+</body>
+</html>
