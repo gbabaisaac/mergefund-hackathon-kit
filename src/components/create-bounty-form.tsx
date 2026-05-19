@@ -14,6 +14,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState({ title: "", reward: "" });
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,15 +27,15 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
     try {
       // Validation: check for empty title and negative reward
-      if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
+      const nextErrors = { title: "", reward: "" };
+      if (!title.trim()) nextErrors.title = "Title is required";
       const rewardNum = Number(reward);
       if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
+        nextErrors.reward = "Reward must be a positive number";
+      }
+      setErrors(nextErrors);
+
+      if (nextErrors.title || nextErrors.reward) {
         isSubmittingRef.current = false;
         setSubmitting(false);
         return;
@@ -54,6 +55,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
       setTitle("");
       setReward("");
+      setErrors({ title: "", reward: "" });
     } finally {
       isSubmittingRef.current = false;
       setSubmitting(false);
