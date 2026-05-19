@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640" viewBox="0 0 360 640">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="20" y="40" fill="#0f172a" font-family="Arial" font-size="16">Bounty Card — Mobile placeholder</text>
+  <rect x="16" y="72" width="328" height="96" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="30" y="102" fill="#0f172a" font-size="14">Fix mobile overflow on stats cards</text>
+  <text x="30" y="128" fill="#475569" font-size="12">$120 • Easy</text>
+</svg>

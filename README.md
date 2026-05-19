@@ -21,6 +21,13 @@ Page: `/bounty-card`
 - Responsive
 - Tailwind styling with hover effects
 
+**Submission note**
+ - Add screenshots and a short demo GIF under `screenshot/` named:
+   - `screenshot/bounty-card-desktop.png`
+   - `screenshot/bounty-card-mobile.png`
+   - `screenshot/bounty-card-demo.gif`
+ - These demo files help maintainers quickly verify responsive and hover behavior.
+
 ### 2) Leaderboard Page
 Page: `/leaderboard`
 
