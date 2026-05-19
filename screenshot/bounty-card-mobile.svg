@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640" viewBox="0 0 360 640">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="20" y="40" fill="#0f172a" font-family="Inter, Arial, sans-serif" font-size="14">Bounty Card — Mobile (polished UI placeholder)</text>
+  <rect x="16" y="70" width="328" height="150" rx="22" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="32" y="90" width="70" height="24" rx="12" fill="#ecfdf3" stroke="#a7f3d0"/>
+  <text x="45" y="106" fill="#15803d" font-size="10" font-family="Inter, Arial, sans-serif">EASY</text>
+  <rect x="112" y="90" width="90" height="24" rx="12" fill="#0f172a"/>
+  <circle cx="126" cy="102" r="3" fill="#34d399"/>
+  <text x="134" y="106" fill="#ffffff" font-size="10" font-family="Inter, Arial, sans-serif">$120</text>
+  <text x="32" y="135" fill="#0f172a" font-size="14" font-family="Inter, Arial, sans-serif">Fix mobile overflow on stats cards</text>
+  <rect x="32" y="150" width="70" height="20" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="48" y="164" fill="#64748b" font-size="10" font-family="Inter, Arial, sans-serif">frontend</text>
+  <rect x="108" y="150" width="40" height="20" rx="10" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="121" y="164" fill="#64748b" font-size="10" font-family="Inter, Arial, sans-serif">ux</text>
+  <text x="32" y="190" fill="#94a3b8" font-size="11" font-family="Inter, Arial, sans-serif">Progress</text>
+  <text x="320" y="190" fill="#94a3b8" font-size="11" font-family="Inter, Arial, sans-serif" text-anchor="end">60%</text>
+  <rect x="32" y="198" width="296" height="9" rx="4.5" fill="#e2e8f0"/>
+  <rect x="32" y="198" width="180" height="9" rx="4.5" fill="#6366f1"/>
+</svg>
