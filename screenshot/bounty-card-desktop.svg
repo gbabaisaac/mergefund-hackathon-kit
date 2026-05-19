@@ -1,10 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
   <rect width="100%" height="100%" fill="#f8fafc"/>
-  <g fill="#0f172a" font-family="Arial, Helvetica, sans-serif" font-size="20">
-    <text x="40" y="80">Bounty Card — Desktop placeholder</text>
-    <text x="40" y="120" fill="#475569">Replace with a PNG/GIF screenshot: 1200×700 recommended</text>
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="40" y="70" fill="#0f172a" font-size="20">Bounty Card — Desktop (polished UI placeholder)</text>
+    <text x="40" y="105" fill="#64748b" font-size="14">Replace with a PNG/GIF screenshot (1200×700 recommended)</text>
   </g>
-  <rect x="40" y="160" width="420" height="120" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
-  <text x="60" y="200" fill="#0f172a" font-size="16">Title: Fix mobile overflow on stats cards</text>
-  <text x="60" y="230" fill="#0f172a" font-size="14">$120 • Easy • Progress: 60%</text>
+  <rect x="40" y="150" width="460" height="170" rx="22" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="70" y="180" width="110" height="28" rx="14" fill="#ecfdf3" stroke="#a7f3d0"/>
+  <text x="85" y="199" fill="#15803d" font-size="11" font-family="Inter, Arial, sans-serif">EASY</text>
+  <rect x="190" y="180" width="120" height="28" rx="14" fill="#0f172a"/>
+  <circle cx="205" cy="194" r="4" fill="#34d399"/>
+  <text x="215" y="199" fill="#ffffff" font-size="11" font-family="Inter, Arial, sans-serif">$120</text>
+  <text x="70" y="230" fill="#0f172a" font-size="16" font-family="Inter, Arial, sans-serif">Fix mobile overflow on stats cards</text>
+  <rect x="70" y="245" width="70" height="22" rx="11" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="88" y="260" fill="#64748b" font-size="11" font-family="Inter, Arial, sans-serif">frontend</text>
+  <rect x="150" y="245" width="50" height="22" rx="11" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="166" y="260" fill="#64748b" font-size="11" font-family="Inter, Arial, sans-serif">ux</text>
+  <rect x="210" y="245" width="60" height="22" rx="11" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="224" y="260" fill="#64748b" font-size="11" font-family="Inter, Arial, sans-serif">bugfix</text>
+  <text x="70" y="295" fill="#94a3b8" font-size="12" font-family="Inter, Arial, sans-serif">Progress</text>
+  <text x="450" y="295" fill="#94a3b8" font-size="12" font-family="Inter, Arial, sans-serif" text-anchor="end">60%</text>
+  <rect x="70" y="305" width="360" height="10" rx="5" fill="#e2e8f0"/>
+  <rect x="70" y="305" width="216" height="10" rx="5" fill="#6366f1"/>
 </svg>
