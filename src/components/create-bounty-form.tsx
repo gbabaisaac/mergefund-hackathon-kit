@@ -2,16 +2,20 @@
 
 import { useRef, useState } from "react";
 
-// BUG 2: Form validation - allows negative numbers and empty titles (see validation below)
-
 type CreateBountyFormProps = {
   onSubmit: (bounty: { title: string; reward: number; difficulty: string }) => void;
+};
+
+type FormErrors = {
+  title?: string;
+  reward?: string;
 };
 
 export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [title, setTitle] = useState("");
   const [reward, setReward] = useState("");
   const [difficulty, setDifficulty] = useState("Easy");
+  const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
   const isSubmittingRef = useRef(false);
@@ -19,26 +23,28 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Synchronous re-entry guard: prevents double submission before React re-renders
     if (isSubmittingRef.current) return;
-    isSubmittingRef.current = true;
-    setSubmitting(true);
+
+    const rewardNum = Number(reward);
+    const nextErrors: FormErrors = {};
+
+    if (!title.trim()) {
+      nextErrors.title = "Title is required";
+    }
+
+    if (isNaN(rewardNum) || rewardNum <= 0) {
+      nextErrors.reward = "Reward must be a positive number";
+    }
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
 
     try {
-      // Validation: check for empty title and negative reward
-      if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
-      const rewardNum = Number(reward);
-      if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
+      isSubmittingRef.current = true;
+      setSubmitting(true);
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -54,6 +60,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
       setTitle("");
       setReward("");
+      setErrors({});
     } finally {
       isSubmittingRef.current = false;
       setSubmitting(false);
@@ -72,13 +79,14 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setErrors((prev) => ({ ...prev, title: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="Bounty title"
-            required
-            minLength={1}
+            aria-invalid={Boolean(errors.title)}
           />
-          {/* FIX 2: Show validation error */}
           {errors.title && (
             <p className="text-red-500 text-xs mt-1">{errors.title}</p>
           )}
@@ -91,12 +99,15 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="number"
             value={reward}
-            onChange={(e) => setReward(e.target.value)}
+            onChange={(e) => {
+              setReward(e.target.value);
+              setErrors((prev) => ({ ...prev, reward: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="100"
             min="1"
+            aria-invalid={Boolean(errors.reward)}
           />
-          {/* FIX 2: Show validation error */}
           {errors.reward && (
             <p className="text-red-500 text-xs mt-1">{errors.reward}</p>
           )}
@@ -117,7 +128,6 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           </select>
         </div>
 
-        {/* FIX 1: Disable button while submitting */}
         <button
           type="submit"
           className="btn w-full"
