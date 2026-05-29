@@ -1,26 +1,50 @@
 "use client";
 
-import { useState } from "react";
-
-// BUG: Filter state resets on page refresh
-// FIX: Persist to URL query params or localStorage
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type FilterProps = {
   onFilterChange: (filters: { difficulty: string; minReward: number }) => void;
 };
 
 export function BountyFilter({ onFilterChange }: FilterProps) {
-  // BUG: State is lost on refresh - not persisted
-  const [difficulty, setDifficulty] = useState("all");
-  const [minReward, setMinReward] = useState(0);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Initialize state from URL params or defaults
+  const [difficulty, setDifficulty] = useState(
+    searchParams.get("difficulty") || "all"
+  );
+  const [minReward, setMinReward] = useState(
+    Number(searchParams.get("minReward")) || 0
+  );
+
+  // Update URL when filters change
+  const updateUrl = useCallback(
+    (newDifficulty: string, newMinReward: number) => {
+      const params = new URLSearchParams();
+      if (newDifficulty !== "all") params.set("difficulty", newDifficulty);
+      if (newMinReward > 0) params.set("minReward", String(newMinReward));
+      const queryString = params.toString();
+      router.replace(`?${queryString}`, { scroll: false });
+    },
+    [router]
+  );
+
+  // Sync initial filter state to parent on mount
+  useEffect(() => {
+    onFilterChange({ difficulty, minReward });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDifficultyChange = (value: string) => {
     setDifficulty(value);
+    updateUrl(value, minReward);
     onFilterChange({ difficulty: value, minReward });
   };
 
   const handleMinRewardChange = (value: number) => {
     setMinReward(value);
+    updateUrl(difficulty, value);
     onFilterChange({ difficulty, minReward: value });
   };
 
@@ -49,10 +73,6 @@ export function BountyFilter({ onFilterChange }: FilterProps) {
           className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           placeholder="0"
         />
-      </div>
-
-      <div className="text-xs text-slate-400">
-        (Bug: refresh the page - filters reset!)
       </div>
     </div>
   );
