@@ -31,6 +31,13 @@ export default function HomePage() {
           </p>
           <a className="btn mt-4" href="/discovery">Open</a>
         </div>
+        <div className="card p-5">
+          <h2 className="text-lg font-semibold">Personal Finance Tracker</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Track income, expenses, budgets, and savings with mock data.
+          </p>
+          <a className="btn mt-4" href="/personal-finance-tracker">Open</a>
+        </div>
       </div>
 
       <h2 className="text-xl font-semibold mt-8">Bug Fix Challenges</h2>
