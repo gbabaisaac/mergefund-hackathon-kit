@@ -29,10 +29,11 @@ export default function RootLayout({
           <header className="border-b border-slate-200 dark:border-slate-700">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
               <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">MergeFund Hackathon Kit</div>
-              <nav className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
+              <nav className="flex flex-wrap items-center justify-end gap-3 text-sm text-slate-600 dark:text-slate-400">
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/bounty-card">Bounty Card</a>
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/leaderboard">Leaderboard</a>
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/discovery">Discovery</a>
+                <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/support-tickets">Support Tickets</a>
               </nav>
             </div>
           </header>
