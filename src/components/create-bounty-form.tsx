@@ -14,6 +14,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState({ title: "", reward: "" });
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,21 +26,17 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
     setSubmitting(true);
 
     try {
-      // Validation: check for empty title and negative reward
-      if (!title.trim()) {
-        alert("Title is required");
-        isSubmittingRef.current = false;
-        setSubmitting(false);
-        return;
-      }
       const rewardNum = Number(reward);
-      if (isNaN(rewardNum) || rewardNum <= 0) {
-        alert("Reward must be a positive number");
+      const nextErrors = {
+        title: title.trim() ? "" : "Title is required",
+        reward: rewardNum > 0 ? "" : "Reward must be a positive number",
+      };
+      setErrors(nextErrors);
+      if (nextErrors.title || nextErrors.reward) {
         isSubmittingRef.current = false;
         setSubmitting(false);
         return;
       }
-
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -48,12 +45,13 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
 
       onSubmit({
         title,
-        reward: Number(reward),
+        reward: rewardNum,
         difficulty,
       });
 
       setTitle("");
       setReward("");
+      setErrors({ title: "", reward: "" });
     } finally {
       isSubmittingRef.current = false;
       setSubmitting(false);

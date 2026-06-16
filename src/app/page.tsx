@@ -31,6 +31,13 @@ export default function HomePage() {
           </p>
           <a className="btn mt-4" href="/discovery">Open</a>
         </div>
+        <div className="card p-5">
+          <h2 className="text-lg font-semibold">Support Tickets</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Review a production-style support queue with SLA, priority, and customer context.
+          </p>
+          <a className="btn mt-4" href="/support-tickets">Open</a>
+        </div>
       </div>
 
       <h2 className="text-xl font-semibold mt-8">Bug Fix Challenges</h2>
