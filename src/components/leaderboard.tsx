@@ -23,13 +23,27 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export function Leaderboard() {
-  // BUG: This sort is unstable - tied entries will have inconsistent ordering
-  // The sort only compares by earned, but when earned values are equal,
-  // the result depends on the browser's sort implementation (which may vary)
-  const sorted = [...mockLeaderboard].sort((a, b) => b.earned - a.earned);
+  // Stable sort: primary by earned (desc), secondary by bounties_completed (desc), tertiary by name (asc)
+  const sorted = [...mockLeaderboard].sort((a, b) => {
+    const earnedDiff = b.earned - a.earned;
+    if (earnedDiff !== 0) return earnedDiff;
+    const bountiesDiff = b.bounties_completed - a.bounties_completed;
+    if (bountiesDiff !== 0) return bountiesDiff;
+    return a.name.localeCompare(b.name);
+  });
 
-  // BUG: Rank calculation doesn't account for ties properly
-  // Users with the same earnings should have the same rank
+  // Calculate rank with tie handling - users with same earned get same rank
+  const getRank = (index: number): number => {
+    if (index === 0) return 1;
+    const current = sorted[index];
+    const previous = sorted[index - 1];
+    if (current.earned === previous.earned) {
+      // Same earned as previous - find the rank of the previous entry
+      return getRank(index - 1);
+    }
+    return index + 1;
+  };
+
   return (
     <div className="card p-6">
       <h3 className="text-lg font-semibold mb-4">Top Earners</h3>
@@ -39,9 +53,8 @@ export function Leaderboard() {
             key={entry.id}
             className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
           >
-            {/* BUG: Rank is just index+1, doesn't handle ties */}
             <span className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-sm font-bold">
-              {index + 1}
+              {getRank(index)}
             </span>
             <img
               src={entry.avatar}
