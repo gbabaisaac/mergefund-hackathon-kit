@@ -14,6 +14,7 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
   const [difficulty, setDifficulty] = useState("Easy");
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ title?: string; reward?: string }>({});
   const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +73,10 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="Bounty title"
             required
@@ -91,7 +95,10 @@ export function CreateBountyForm({ onSubmit }: CreateBountyFormProps) {
           <input
             type="number"
             value={reward}
-            onChange={(e) => setReward(e.target.value)}
+            onChange={(e) => {
+              setReward(e.target.value);
+              if (errors.reward) setErrors((prev) => ({ ...prev, reward: undefined }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2"
             placeholder="100"
             min="1"

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Discovery algorithm page preview</title>
+  <desc id="desc">A marketplace ranking preview showing total scores and factor bars.</desc>
+  <rect width="1200" height="720" fill="#f8fafc"/>
+  <rect x="52" y="38" width="1096" height="644" rx="24" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="92" y="92" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#64748b">MARKETPLACE INTELLIGENCE</text>
+  <text x="92" y="140" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#0f172a">Discovery Algorithm</text>
+  <text x="92" y="174" font-family="Arial, sans-serif" font-size="16" fill="#475569">A deterministic score balances reward, funding, availability, and recency.</text>
+  <g font-family="Arial, sans-serif">
+    <g transform="translate(92 212)"><rect width="240" height="78" rx="14" fill="#fff" stroke="#e2e8f0"/><text x="18" y="28" font-size="11" font-weight="700" fill="#94a3b8">REWARD</text><text x="18" y="58" font-size="22" font-weight="700" fill="#0f172a">30 pts</text></g>
+    <g transform="translate(348 212)"><rect width="240" height="78" rx="14" fill="#fff" stroke="#e2e8f0"/><text x="18" y="28" font-size="11" font-weight="700" fill="#94a3b8">FUNDING</text><text x="18" y="58" font-size="22" font-weight="700" fill="#0f172a">25 pts</text></g>
+    <g transform="translate(604 212)"><rect width="240" height="78" rx="14" fill="#fff" stroke="#e2e8f0"/><text x="18" y="28" font-size="11" font-weight="700" fill="#94a3b8">AVAILABILITY</text><text x="18" y="58" font-size="22" font-weight="700" fill="#0f172a">25 pts</text></g>
+    <g transform="translate(860 212)"><rect width="240" height="78" rx="14" fill="#fff" stroke="#e2e8f0"/><text x="18" y="28" font-size="11" font-weight="700" fill="#94a3b8">RECENCY</text><text x="18" y="58" font-size="22" font-weight="700" fill="#0f172a">20 pts</text></g>
+    <rect x="92" y="322" width="1010" height="142" rx="18" fill="#fff" stroke="#e2e8f0"/>
+    <text x="118" y="356" font-size="12" font-weight="700" fill="#94a3b8">RANK #1</text><text x="118" y="390" font-size="20" font-weight="700" fill="#0f172a">Authentication reliability improvements</text><text x="1010" y="356" font-size="12" font-weight="700" fill="#94a3b8">SCORE</text><text x="1010" y="402" font-size="34" font-weight="700" fill="#0369a1">74.5</text><text x="118" y="432" font-size="13" fill="#64748b">Reward $500  ·  Funded 90%  ·  Claims 4</text>
+    <text x="680" y="350" font-size="11" font-weight="700" fill="#94a3b8">REWARD</text><rect x="680" y="358" width="260" height="8" rx="4" fill="#e2e8f0"/><rect x="680" y="358" width="220" height="8" rx="4" fill="#0284c7"/><text x="680" y="388" font-size="11" font-weight="700" fill="#94a3b8">FUNDING</text><rect x="680" y="396" width="260" height="8" rx="4" fill="#e2e8f0"/><rect x="680" y="396" width="234" height="8" rx="4" fill="#0284c7"/>
+    <rect x="92" y="486" width="1010" height="142" rx="18" fill="#fff" stroke="#e2e8f0"/>
+    <text x="118" y="520" font-size="12" font-weight="700" fill="#94a3b8">RANK #2</text><text x="118" y="554" font-size="20" font-weight="700" fill="#0f172a">Landing page performance audit</text><text x="1010" y="520" font-size="12" font-weight="700" fill="#94a3b8">SCORE</text><text x="1010" y="566" font-size="34" font-weight="700" fill="#0369a1">71.6</text><text x="118" y="596" font-size="13" fill="#64748b">Reward $180  ·  Funded 40%  ·  Claims 1</text>
+    <text x="680" y="514" font-size="11" font-weight="700" fill="#94a3b8">REWARD</text><rect x="680" y="522" width="260" height="8" rx="4" fill="#e2e8f0"/><rect x="680" y="522" width="214" height="8" rx="4" fill="#0284c7"/><text x="680" y="552" font-size="11" font-weight="700" fill="#94a3b8">FUNDING</text><rect x="680" y="560" width="260" height="8" rx="4" fill="#e2e8f0"/><rect x="680" y="560" width="195" height="8" rx="4" fill="#0284c7"/>
+  </g>
+</svg>
