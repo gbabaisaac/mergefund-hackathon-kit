@@ -1,32 +1,48 @@
 import { mockDiscovery } from "@/data/mock-discovery";
-
-function scoreBounty(bounty: typeof mockDiscovery[number]) {
-  const fundedBoost = bounty.fundedPercent >= 80 ? 20 : bounty.fundedPercent / 4;
-  const activityBoost = bounty.claimedCount * 5;
-  const recencyBoost = Math.max(0, 14 - bounty.postedDaysAgo);
-  return fundedBoost + activityBoost + recencyBoost + bounty.reward / 50;
-}
+import { rankBounties } from "@/lib/discovery-score";
 
 export default function DiscoveryPage() {
-  const ranked = [...mockDiscovery]
-    .map((bounty) => ({ ...bounty, score: scoreBounty(bounty) }))
-    .sort((a, b) => b.score - a.score);
+  const ranked = rankBounties(mockDiscovery);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold">Discovery Algorithm</h1>
-        <p className="text-slate-600">
-          Improve or replace the scoring function to rank bounties by relevance.
+        <span className="pill border-brand-200 text-brand-700 dark:border-brand-700 dark:text-brand-300">Marketplace intelligence</span>
+        <h1 className="mt-4 text-3xl font-bold tracking-tight">Discovery Algorithm</h1>
+        <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">
+          A deterministic, explainable ranking that balances reward, funding health, availability, and recency instead of rewarding only the loudest bounty.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-4">
+        {[
+          ["Reward", "30 pts"],
+          ["Funding", "25 pts"],
+          ["Availability", "20 pts"],
+          ["Recency", "15 pts"],
+        ].map(([label, value]) => (
+          <div key={label} className="card p-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</p>
+            <p className="mt-2 text-xl font-bold text-slate-900 dark:text-white">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-4">
         {ranked.map((bounty) => (
-          <div key={bounty.id} className="card p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold">{bounty.title}</h3>
+          <article key={bounty.id} className="card p-5 sm:p-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Rank #{ranked.indexOf(bounty) + 1}</div>
+                    <h3 className="text-lg font-semibold">{bounty.title}</h3>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Score</div>
+                    <div className="text-3xl font-bold text-brand-700 dark:text-brand-300">{bounty.score.total.toFixed(1)}</div>
+                  </div>
+                </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {bounty.tags.map((tag) => (
                     <span key={tag} className="pill">
@@ -34,27 +50,28 @@ export default function DiscoveryPage() {
                     </span>
                   ))}
                 </div>
+                <div className="mt-5 grid grid-cols-3 gap-3 text-xs text-slate-500 dark:text-slate-400">
+                  <div>Reward <span className="font-semibold text-slate-900 dark:text-slate-100">${bounty.reward}</span></div>
+                  <div>Funded <span className="font-semibold text-slate-900 dark:text-slate-100">{bounty.fundedPercent}%</span></div>
+                  <div>Claims <span className="font-semibold text-slate-900 dark:text-slate-100">{bounty.claimedCount}</span></div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-slate-500">Reward</div>
-                <div className="text-xl font-bold">${bounty.reward}</div>
+              <div className="grid w-full gap-2 lg:max-w-sm">
+                {Object.entries(bounty.score)
+                  .filter(([key]) => key !== "total")
+                  .map(([key, value]) => (
+                    <div key={key}>
+                      <div className="mb-1 flex justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        <span>{key}</span><span>{value.toFixed(1)}</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                        <div className="h-full rounded-full bg-brand-600" style={{ width: `${(value / ({ reward: 30, funding: 25, availability: 20, recency: 15 } as Record<string, number>)[key]) * 100}%` }} />
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-xs text-slate-500">
-              <div>
-                Funded: <span className="font-semibold text-slate-900">{bounty.fundedPercent}%</span>
-              </div>
-              <div>
-                Claims: <span className="font-semibold text-slate-900">{bounty.claimedCount}</span>
-              </div>
-              <div>
-                Posted: <span className="font-semibold text-slate-900">{bounty.postedDaysAgo}d ago</span>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-slate-500">
-              Score: <span className="font-semibold text-brand-700">{bounty.score.toFixed(1)}</span>
-            </div>
-          </div>
+          </article>
         ))}
       </div>
     </div>
