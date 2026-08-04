@@ -1,6 +1,12 @@
-import { mockDiscovery } from "@/data/mock-discovery";
-
-export type DiscoveryBounty = (typeof mockDiscovery)[number];
+export type DiscoveryBounty = {
+  id: string;
+  title: string;
+  reward: number;
+  fundedPercent: number;
+  tags: string[];
+  claimedCount: number;
+  postedDaysAgo: number;
+};
 export type RankingPreset = "balanced" | "highValue" | "quickWin";
 
 export type ScoreBreakdown = {
@@ -61,9 +67,11 @@ export function scoreBounty(
 ) {
   const weights = rankingPresets[preset].weights;
   const normalizedPayout =
-    maxReward > 0 ? Math.log1p(bounty.reward) / Math.log1p(maxReward) : 0;
+    maxReward > 0
+      ? Math.log1p(Math.max(0, bounty.reward)) / Math.log1p(maxReward)
+      : 0;
   const fundedConfidence = Math.min(1, Math.max(0, bounty.fundedPercent / 100));
-  const winProbability = 1 / (1 + bounty.claimedCount * 0.45);
+  const winProbability = 1 / (1 + Math.max(0, bounty.claimedCount) * 0.45);
   const freshness = Math.exp(-Math.max(0, bounty.postedDaysAgo) / 14);
 
   const breakdown: ScoreBreakdown = {

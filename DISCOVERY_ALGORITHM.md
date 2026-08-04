@@ -26,6 +26,12 @@ Stable tie-breakers use funding, recency, then ID, so identical inputs always
 produce identical output. The implementation is isolated in
 `src/app/discovery/scoring.ts` to keep it testable and reusable.
 
+## Verification
+
+Run `npm run test:discovery` to verify score bounds, preset behavior,
+deterministic ordering, rank assignment, input immutability, empty datasets,
+and defensive handling of out-of-range marketplace data.
+
 ## Tradeoffs
 
 - A marketplace with user profiles could add skill/tag affinity as a fifth
