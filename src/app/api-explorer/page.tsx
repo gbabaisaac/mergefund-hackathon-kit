@@ -3,9 +3,16 @@
 import { useMemo, useState } from "react";
 import {
   mockApiEndpoints,
-  type ApiEndpoint,
   type HttpMethod,
 } from "@/data/mock-api-endpoints";
+import {
+  buildRequestUrl,
+  codeSample,
+  createRequestDraft,
+  validateRequestBody,
+  type ApiRequestDraft,
+  type CodeLanguage,
+} from "./request";
 
 const methodStyles: Record<HttpMethod, string> = {
   GET: "bg-emerald-400/15 text-emerald-700 dark:text-emerald-300",
@@ -15,7 +22,6 @@ const methodStyles: Record<HttpMethod, string> = {
 
 const tabs = ["Parameters", "Headers", "Body"] as const;
 type RequestTab = (typeof tabs)[number];
-type CodeLanguage = "cURL" | "JavaScript" | "Python";
 
 function MethodBadge({ method }: { method: HttpMethod }) {
   return (
@@ -23,58 +29,6 @@ function MethodBadge({ method }: { method: HttpMethod }) {
       {method}
     </span>
   );
-}
-
-function buildRequestUrl(endpoint: ApiEndpoint) {
-  let path = endpoint.path;
-  endpoint.parameters
-    .filter((parameter) => parameter.location === "path")
-    .forEach((parameter) => {
-      path = path.replace(`:${parameter.name}`, parameter.value || `:${parameter.name}`);
-    });
-  const query = endpoint.parameters
-    .filter((parameter) => parameter.location === "query" && parameter.enabled && parameter.value)
-    .map((parameter) => `${parameter.name}=${encodeURIComponent(parameter.value)}`)
-    .join("&");
-
-  return `https://api.mergefund.dev${path}${query ? `?${query}` : ""}`;
-}
-
-function codeSample(endpoint: ApiEndpoint, language: CodeLanguage) {
-  const url = buildRequestUrl(endpoint);
-  const body = endpoint.requestBody;
-
-  if (language === "JavaScript") {
-    return `const response = await fetch("${url}", {
-  method: "${endpoint.method}",
-  headers: {
-    "Authorization": "Bearer $MERGEFUND_API_KEY",
-    "Content-Type": "application/json"
-  }${body ? `,\n  body: JSON.stringify(${body})` : ""}
-});
-
-const data = await response.json();`;
-  }
-
-  if (language === "Python") {
-    return `import os
-import requests
-
-response = requests.${endpoint.method.toLowerCase()}(
-    "${url}",
-    headers={"Authorization": f"Bearer {os.environ['MERGEFUND_API_KEY']}"}${
-      body ? `,\n    json=${body}` : ""
-    }
-)
-
-data = response.json()`;
-  }
-
-  return `curl --request ${endpoint.method} \\
-  --url '${url}' \\
-  --header 'Authorization: Bearer $MERGEFUND_API_KEY'${
-    body ? ` \\\n+  --header 'Content-Type: application/json' \\\n+  --data '${body.replace(/\n/g, "")}'` : ""
-  }`;
 }
 
 function EmptyState({ message }: { message: string }) {
@@ -97,10 +51,18 @@ export default function ApiExplorerPage() {
   const [language, setLanguage] = useState<CodeLanguage>("cURL");
   const [isSending, setIsSending] = useState(false);
   const [hasResponse, setHasResponse] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [copiedResponse, setCopiedResponse] = useState(false);
+  const [drafts, setDrafts] = useState<Record<string, ApiRequestDraft>>(() =>
+    Object.fromEntries(
+      mockApiEndpoints.map((item) => [item.id, createRequestDraft(item)]),
+    ),
+  );
 
   const endpoint =
     mockApiEndpoints.find((item) => item.id === selectedId) ?? mockApiEndpoints[0];
+  const draft = drafts[endpoint.id] ?? createRequestDraft(endpoint);
+  const bodyError = validateRequestBody(draft);
   const groups = useMemo(() => {
     const query = search.trim().toLowerCase();
     return ["Bounties", "Developers", "Funding"].map((group) => ({
@@ -116,6 +78,7 @@ export default function ApiExplorerPage() {
   }, [search]);
 
   const sendRequest = () => {
+    if (bodyError) return;
     setIsSending(true);
     setHasResponse(false);
     window.setTimeout(() => {
@@ -124,11 +87,39 @@ export default function ApiExplorerPage() {
     }, 650);
   };
 
-  const sample = codeSample(endpoint, language);
+  const updateParameter = (
+    index: number,
+    patch: Partial<ApiRequestDraft["parameters"][number]>,
+  ) => {
+    setDrafts((current) => ({
+      ...current,
+      [endpoint.id]: {
+        ...draft,
+        parameters: draft.parameters.map((parameter, parameterIndex) =>
+          parameterIndex === index ? { ...parameter, ...patch } : parameter,
+        ),
+      },
+    }));
+  };
+
+  const updateRequestBody = (requestBody: string) => {
+    setDrafts((current) => ({
+      ...current,
+      [endpoint.id]: { ...draft, requestBody },
+    }));
+  };
+
+  const sample = codeSample(endpoint, draft, language);
   const copySample = async () => {
     await navigator.clipboard?.writeText(sample);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
+    setCopiedSnippet(true);
+    window.setTimeout(() => setCopiedSnippet(false), 1200);
+  };
+
+  const copyResponse = async () => {
+    await navigator.clipboard?.writeText(JSON.stringify(endpoint.response, null, 2));
+    setCopiedResponse(true);
+    window.setTimeout(() => setCopiedResponse(false), 1200);
   };
 
   return (
@@ -254,13 +245,14 @@ export default function ApiExplorerPage() {
                   <input
                     aria-label="Request URL"
                     className="min-w-0 flex-1 bg-transparent px-3 font-mono text-xs text-slate-300 outline-none"
-                    value={buildRequestUrl(endpoint)}
+                    value={buildRequestUrl(endpoint, draft)}
                     readOnly
                   />
                   <button
                     type="button"
                     onClick={sendRequest}
-                    disabled={isSending}
+                    disabled={isSending || Boolean(bodyError)}
+                    title={bodyError ?? undefined}
                     className="m-1.5 min-w-20 rounded-lg bg-violet-500 px-3 py-2 text-xs font-black text-white shadow-lg shadow-violet-500/20 transition hover:bg-violet-400 disabled:cursor-wait disabled:opacity-60"
                   >
                     {isSending ? "Sending…" : "Send"}
@@ -294,7 +286,7 @@ export default function ApiExplorerPage() {
                 </div>
 
                 <div className="mt-4 min-h-52">
-                  {requestTab === "Parameters" && endpoint.parameters.length ? (
+                  {requestTab === "Parameters" && draft.parameters.length ? (
                     <div className="space-y-2">
                       <div className="grid grid-cols-[24px_1fr_1fr_60px] gap-2 px-2 text-[9px] font-black uppercase tracking-wider text-slate-600">
                         <span />
@@ -302,18 +294,24 @@ export default function ApiExplorerPage() {
                         <span>Value</span>
                         <span>In</span>
                       </div>
-                      {endpoint.parameters.map((parameter) => (
+                      {draft.parameters.map((parameter, parameterIndex) => (
                         <div key={parameter.name} className="grid grid-cols-[24px_1fr_1fr_60px] items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] p-2">
                           <input
                             aria-label={`Enable ${parameter.name}`}
                             type="checkbox"
-                            defaultChecked={parameter.enabled}
+                            checked={parameter.enabled}
+                            onChange={(event) =>
+                              updateParameter(parameterIndex, { enabled: event.target.checked })
+                            }
                             className="accent-violet-500"
                           />
                           <code className="truncate text-xs text-cyan-300">{parameter.name}</code>
                           <input
                             aria-label={`${parameter.name} value`}
-                            defaultValue={parameter.value}
+                            value={parameter.value}
+                            onChange={(event) =>
+                              updateParameter(parameterIndex, { value: event.target.value })
+                            }
                             placeholder="Empty"
                             className="min-w-0 rounded-md border border-white/10 bg-[#070b14] px-2 py-1.5 font-mono text-xs text-slate-300 outline-none focus:border-violet-400/50"
                           />
@@ -322,7 +320,7 @@ export default function ApiExplorerPage() {
                       ))}
                     </div>
                   ) : null}
-                  {requestTab === "Parameters" && !endpoint.parameters.length ? (
+                  {requestTab === "Parameters" && !draft.parameters.length ? (
                     <EmptyState message="This endpoint has no URL parameters." />
                   ) : null}
                   {requestTab === "Headers" ? (
@@ -339,13 +337,27 @@ export default function ApiExplorerPage() {
                       <p className="pt-2 text-xs leading-5 text-slate-600">Secrets are always redacted in the explorer and generated snippets.</p>
                     </div>
                   ) : null}
-                  {requestTab === "Body" && endpoint.requestBody ? (
-                    <textarea
-                      aria-label="JSON request body"
-                      defaultValue={endpoint.requestBody}
-                      spellCheck={false}
-                      className="h-52 w-full resize-none rounded-xl border border-white/10 bg-[#070b14] p-4 font-mono text-xs leading-5 text-emerald-300 outline-none focus:border-violet-400/50"
-                    />
+                  {requestTab === "Body" && draft.requestBody !== undefined ? (
+                    <div>
+                      <textarea
+                        aria-label="JSON request body"
+                        aria-invalid={Boolean(bodyError)}
+                        aria-describedby={bodyError ? "request-body-error" : undefined}
+                        value={draft.requestBody}
+                        onChange={(event) => updateRequestBody(event.target.value)}
+                        spellCheck={false}
+                        className={`h-52 w-full resize-none rounded-xl border bg-[#070b14] p-4 font-mono text-xs leading-5 text-emerald-300 outline-none ${
+                          bodyError
+                            ? "border-rose-400/70 focus:border-rose-300"
+                            : "border-white/10 focus:border-violet-400/50"
+                        }`}
+                      />
+                      {bodyError ? (
+                        <p id="request-body-error" className="mt-2 text-xs font-semibold text-rose-300">
+                          {bodyError}
+                        </p>
+                      ) : null}
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -361,7 +373,13 @@ export default function ApiExplorerPage() {
                   <div className="flex items-center gap-3 font-mono text-[10px]">
                     <span className="font-black text-emerald-300">{endpoint.status} {endpoint.status === 201 ? "Created" : "OK"}</span>
                     <span className="text-slate-600">{endpoint.timing} ms</span>
-                    <span className="text-slate-600">1.2 KB</span>
+                    <button
+                      type="button"
+                      onClick={copyResponse}
+                      className="rounded-md border border-white/10 px-2 py-1 font-sans font-bold text-slate-400 transition hover:bg-white/5 hover:text-white"
+                    >
+                      {copiedResponse ? "Copied ✓" : "Copy JSON"}
+                    </button>
                   </div>
                 ) : null}
               </div>
@@ -402,7 +420,7 @@ export default function ApiExplorerPage() {
                 onClick={copySample}
                 className="self-start rounded-lg border border-white/10 px-3 py-1.5 text-[10px] font-bold text-slate-400 transition hover:bg-white/5 hover:text-white sm:self-auto"
               >
-                {copied ? "Copied ✓" : "Copy snippet"}
+                {copiedSnippet ? "Copied ✓" : "Copy snippet"}
               </button>
             </div>
             <pre className="max-h-72 overflow-auto bg-[#070b14] p-5 font-mono text-xs leading-6 text-cyan-200">

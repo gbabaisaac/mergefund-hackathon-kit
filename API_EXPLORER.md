@@ -8,10 +8,11 @@ All data and responses are intentionally mocked.
 
 - Searchable endpoint catalog grouped by Bounties, Developers, and Funding
 - Method-aware endpoint selection and a composed request URL
-- Parameter, header, and JSON body views
+- Live parameter toggles and inputs that immediately rebuild the request URL
+- Parameter, header, and editable JSON body views with inline validation
 - Redacted authentication values so secrets never leak into examples
 - Simulated request loading and success states with status, timing, and size
-- Scrollable formatted JSON responses
+- Scrollable formatted JSON responses with one-click copy feedback
 - Generated cURL, JavaScript, and Python snippets with copy feedback
 - Responsive layouts for mobile, tablet, and desktop
 - Keyboard focus states, semantic labels, disabled states, and status affordances
@@ -29,11 +30,16 @@ All data and responses are intentionally mocked.
 
 ## Tradeoffs and next steps
 
-- Parameter inputs demonstrate editing but do not mutate the fixture-backed URL.
-  A production version would store per-endpoint request drafts and validate them
-  against an OpenAPI schema.
+- Per-endpoint drafts are kept in local UI state and never leave the browser.
+  A production version could persist drafts and validate them against an
+  OpenAPI schema.
 - Syntax highlighting is deliberately dependency-free to preserve the starter
   kit's small dependency surface. A larger docs product could lazy-load a code
   highlighter.
 - The environment switch is visual in mock mode. Real environments should be
   server-configured and protected by authenticated, scoped API keys.
+
+## Verification
+
+Run `npm run test:api-explorer` to verify URL composition, path/query encoding,
+parameter toggles, edited-body snippets, and invalid JSON handling.
