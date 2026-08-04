@@ -33,6 +33,7 @@ export default function RootLayout({
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/bounty-card">Bounty Card</a>
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/leaderboard">Leaderboard</a>
                 <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/discovery">Discovery</a>
+                <a className="hover:text-slate-900 dark:hover:text-slate-100" href="/api-explorer">API Explorer</a>
               </nav>
             </div>
           </header>
