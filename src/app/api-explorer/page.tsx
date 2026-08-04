@@ -91,21 +91,27 @@ export default function ApiExplorerPage() {
     index: number,
     patch: Partial<ApiRequestDraft["parameters"][number]>,
   ) => {
-    setDrafts((current) => ({
-      ...current,
-      [endpoint.id]: {
-        ...draft,
-        parameters: draft.parameters.map((parameter, parameterIndex) =>
-          parameterIndex === index ? { ...parameter, ...patch } : parameter,
-        ),
-      },
-    }));
+    setDrafts((current) => {
+      const currentDraft = current[endpoint.id] ?? createRequestDraft(endpoint);
+      return {
+        ...current,
+        [endpoint.id]: {
+          ...currentDraft,
+          parameters: currentDraft.parameters.map((parameter, parameterIndex) =>
+            parameterIndex === index ? { ...parameter, ...patch } : parameter,
+          ),
+        },
+      };
+    });
   };
 
   const updateRequestBody = (requestBody: string) => {
     setDrafts((current) => ({
       ...current,
-      [endpoint.id]: { ...draft, requestBody },
+      [endpoint.id]: {
+        ...(current[endpoint.id] ?? createRequestDraft(endpoint)),
+        requestBody,
+      },
     }));
   };
 

@@ -74,6 +74,7 @@ test("generated snippets use the edited URL and body", () => {
     const sample = codeSample(postEndpoint, draft, language);
     assert.match(sample, /https:\/\/api\.mergefund\.dev\/v1\/bounties/);
     assert.match(sample, /25000/);
+    assert.doesNotMatch(sample, /^\+/m);
   }
 });
 

@@ -91,7 +91,7 @@ data = response.json()`;
   --url '${url}' \\
   --header 'Authorization: Bearer $MERGEFUND_API_KEY'${
     body
-      ? ` \\\n+  --header 'Content-Type: application/json' \\\n+  --data '${body.replace(/\n/g, "")}'`
+      ? ` \\\n  --header 'Content-Type: application/json' \\\n  --data '${body.replace(/\n/g, "")}'`
       : ""
   }`;
 }
