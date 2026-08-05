@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 type BountyCardProps = {
   title: string;
   reward: number;
@@ -13,11 +15,28 @@ const difficultyStyles = {
 };
 
 export function BountyCard({ title, reward, tags, difficulty, progress }: BountyCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div className="card p-4 sm:p-5 hover:shadow-md transition">
+    <div
+      className="card p-4 sm:p-5 hover:shadow-md transition cursor-pointer select-none"
+      onClick={() => setExpanded(!expanded)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(!expanded); } }}
+      aria-expanded={expanded}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base sm:text-lg font-semibold leading-snug break-words">{title}</h3>
+          {/* Title + expand icon */}
+          <div className="flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-semibold leading-snug break-words">{title}</h3>
+            <span className={`text-xs transition-transform duration-200 ${expanded ? "rotate-180" : ""} select-none`}>
+              ▼
+            </span>
+          </div>
+
+          {/* Tags */}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {tags.map((tag) => (
               <span key={tag} className="pill text-[11px] sm:text-xs px-2 py-0.5 sm:px-3 sm:py-1">
@@ -26,13 +45,19 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
             ))}
           </div>
         </div>
+
+        {/* Right column: reward + difficulty */}
         <div className="text-right shrink-0">
           <div className="text-xl sm:text-xl font-bold">${reward}</div>
-          <span className={`mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap ${difficultyStyles[difficulty]}`}>
+          <span
+            className={`mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] sm:text-xs font-semibold whitespace-nowrap ${difficultyStyles[difficulty]}`}
+          >
             {difficulty}
           </span>
         </div>
       </div>
+
+      {/* Progress bar — always visible */}
       <div className="mt-3">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>Progress</span>
@@ -40,11 +65,20 @@ export function BountyCard({ title, reward, tags, difficulty, progress }: Bounty
         </div>
         <div className="mt-1.5 h-2 w-full rounded-full bg-slate-100">
           <div
-            className="h-2 rounded-full bg-brand-600"
+            className="h-2 rounded-full bg-brand-600 transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
+
+      {/* Expanded extra info (on click) */}
+      {expanded && (
+        <div className="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-500 space-y-1 animate-fade-in">
+          <p><strong>Difficulty:</strong> {difficulty}</p>
+          <p><strong>Reward:</strong> ${reward.toLocaleString()}</p>
+          <p><strong>Tags:</strong> {tags.join(", ")}</p>
+        </div>
+      )}
     </div>
   );
 }
